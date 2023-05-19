@@ -1,5 +1,4 @@
 # Qdrant Examples
-
 A collection of examples and tutorials for Qdrant vector search engine
 
 | Example                                                                                                                                | Description                                                                                | Technologies                                    |
