@@ -1,5 +1,6 @@
 # Qdrant Examples
-A collection of examples and tutorials for Qdrant vector search engine
+
+This repo contains a collection of tutorials, demos, and how-to guides on how to use Qdrant and adjacent technologies.
 
 | Example                                                                                                                                | Description                                                                                | Technologies                                    |
 | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------- |
