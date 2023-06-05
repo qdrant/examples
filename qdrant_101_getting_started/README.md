@@ -1,8 +1,8 @@
 # Getting Started with Qdrant
 
-Vector databases shine in many applications like [semantic search](https://en.wikipedia.org/wiki/Semantic_search) and [recommendation](https://en.wikipedia.org/wiki/Recommender_system), and in this tutorial, we'll learn about how to get started building these systems with one of the most popular and fastest growing vector databases in the market, [Qdrant](qdrant.tech).
+Vector databases shine in many applications like [semantic search](https://en.wikipedia.org/wiki/Semantic_search) and [recommendation systems](https://en.wikipedia.org/wiki/Recommender_system), and in this tutorial, you will learn how to get started building such systems with one of the most popular and fastest growing vector databases in the market, [Qdrant](qdrant.tech).
 
-## Table of Contents
+## Table of contents
 
 1. [Learning Outcomes](##-1.-Learning-Outcomes)
 2. [Installation](##-2.-Installation)
@@ -14,23 +14,23 @@ Vector databases shine in many applications like [semantic search](https://en.wi
 5. [Conclusion](##-5.-Conclusion)
 6. [Resources](##-6.-Resources)
 
-## 1. Learning Outcomes
+## 1. Learning outcomes
 
-By the end of this tutorial, you will be able to
+By the end of this tutorial, you will be able to: 
 - Create, update, and query collections of vectors using Qdrant.
 - Conduct semantic search based on new data.
 - Develop an intuition for the mechanics behind the recommendation API of Qdrant.
-- Understand, and get creative with, the kind of data you can add to your payload.
+- Understand and get creative with the kind of data you can add to your payload.
 
 ## 2. Installation
 
-The open source version of Qdrant is available as a docker image and it can be pulled and run from any machine with docker in it. If you don't have Docker installed in your PC you can follow the instructions in the official documentation [here](https://docs.docker.com/get-docker/). After that, open your terminal start by downloading the image with the following command.
+The open source version of Qdrant is available as a Docker image. You can download the image and run it from any machine with Docker installed on it. If you don't have Docker installed, follow the instructions [here](https://docs.docker.com/get-docker/). After you have installed Docker, Terminal and download the Qdrant image:
 
 ```sh
 docker pull qdrant/qdrant
 ```
 
-Next, initialize Qdrant with the following command, and you should be good to go.
+Next, initialize Qdrant:
 
 ```sh
 docker run -p 6333:6333 \
@@ -38,13 +38,13 @@ docker run -p 6333:6333 \
     qdrant/qdrant
 ```
 
-You should see something similar to the following image.
+You should see something like this:
 
 ![dockerqdrant](../images/docker_qdrant.png)
 
-If you experience any issues during the start process, please let us know in our [discord channel here](https://qdrant.to/discord). We are always available and happy to help.
+If you experience any issues during installation, please let us know in our [Discord channel here](https://qdrant.to/discord). 
 
-Now that you have Qdrant up and running, your next step is to pick a client to connect to it. We'll be using Python as it has the most mature data tools' ecosystem out there. So, let's start setting up our development environment and getting the libraries we'll be using today.
+Now that you have Qdrant up and running, you need to pick a client to connect to it. We'll be using Python as it has the most mature data tools ecosystem out there. Let's start setting up our development environment and getting the libraries we'll be using.
 
 ```sh
 # with mamba or conda
@@ -59,15 +59,13 @@ source venv/bin/activate
 pip install qdrant-client pandas numpy faker
 ```
 
-After your have your environment ready, let's get started using Qdrant.
+After your have your environment ready, let's begin using Qdrant.
 
 **Note:** At the time of writing, Qdrant supports Rust, GO, Python and TypeScript. We expect other programming languages to be added in the future.
 
-## 3. Getting Started
+## 3. Getting started
 
-The two modules we'll use the most are the `QdrantClient` and the `models` one. The former allows us to connect to Qdrant or it allows us to run an in-memory database by switching the parameter `location=` to `":memory:"` (this is a great feature for testing in a CI/CD pipeline). The latter gives us access to most of the functionalities with need to interact with Qdrant.
-
-We'll start by instantiating our client using `host="localhost"` and `port=6333` (as it is the default port we used earlier with docker). You can also follow along with the `location=":memory:"` option commented out below.
+The two modules we are going to use are `QdrantClient` and `models`. The former lets you connect to Qdrant or to run an in-memory database by switching the parameter `location=` to `":memory:"`. The latter gives you access to most functionalities you need to interact with Qdrant. 
 
 
 ```python
@@ -75,6 +73,8 @@ from qdrant_client import QdrantClient
 from qdrant_client.http import models
 from qdrant_client.http.models import CollectionStatus
 ```
+
+We'll start by instantiating our client using `host="localhost"` and `port=6333` (as it is the default port we used earlier with Docker). You can also follow along with the `location=":memory:"` option commented out below.
 
 
 ```python
@@ -95,11 +95,14 @@ client
 # client
 ```
 
-In OLTP and OLAP databases we call specific bundles of rows and columns **Tables**, but in vector databases, the rows are known as vectors, the columns are known as dimensions, and the combination of the two (plus some metadata) is a [**Collection**](https://qdrant.tech/documentation/collections/).
+---
+**Note:** In OLTP and OLAP databases we call specific bundles of rows and columns **Tables**. However, in vector databases, the rows are known as **Vectors**, while the columns are **Dimensions**. The combination of the two (plus some metadata) is a [**Collection**](https://qdrant.tech/documentation/concepts/collections/).
 
-In the same way in which we can create many tables in an OLTP or an OLAP database, we can create many collections in a vector database like Qdrant using one of its clients. The key difference to note is that when we create a collection in Qdrant, we need to specify the width of the collection (i.e. the length of the vector or amount of dimensions) beforehand with the parameter `size=...`, as well as the distance metric with the parameter `distance=...` (which can be changed later on).
+Just as we can create many tables in an OLTP or an OLAP database, we can create many collections in a vector database like Qdrant using one of its clients. The key difference to note is that when we create a collection in Qdrant, we need to specify the width of the collection (i.e. the length of the vector or amount of dimensions) beforehand with the parameter `size=...`, as well as the distance metric with the parameter `distance=...`.
 
 The distances currently supported by Qdrant are [**Cosine Similarity**](https://en.wikipedia.org/wiki/Cosine_similarity), [**Dot Product**](https://en.wikipedia.org/wiki/Dot_product), and [**Euclidean Distance**](https://en.wikipedia.org/wiki/Euclidean_distance).
+
+---
 
 Let's create our first collection and have the vectors be of size 100 with a distance set to **Cosine Similarity**.
 
@@ -146,28 +149,38 @@ assert collection_info.status == CollectionStatus.GREEN
 assert collection_info.vectors_count == 0
 ```
 
-There's a couple of things to note from what we have done so far.
-- The first is that when we initiated our docker image, we created a local directory called, `qdrant_storage`, and this is where all of our collections, plus their metadata, will be saved at. Qdrant can use one of two options for [storage](https://qdrant.tech/documentation/storage/), **in-memory** storage (which stores all vectors in RAM and has the highest speed since disk access is required only for persistence), or **memmap** storage (which creates a virtual address space associated with the file on disk). You can have a look at that directory in a *nix system with `tree qdrant_storage -L 2`, and something similar to the following output should come up for you.
-    ```bash
-    qdrant_storage
-    ├── aliases
-    │   └── data.json
-    ├── collections
-    │   └── my_first_collection
-    └── raft_state
-    ```
-- The second is that we used `client.recreate_collection()` and this command, as the name implies, can be used more than once to create new collections with or without the same name, so be careful no to recreate a collection that you did not intend to recreate. To create a brand new collection that cannot be recreated again, we would use `client.create_collection()` method instead.
-- Our collection will hold vectors of 100 dimensions and the distance metric has been set to Cosine Similarity.
+Two important takeaways:
 
-Now that we know how to create collections, let's create a bit of fake data and add some vectors to it.
+1. When you initiated the Docker image, you created a local directory called, `qdrant_storage`. This is where all of your collections and their metadata will be stored. 
 
-### 3.1 Adding Points
+    Qdrant can use one of two options for [storage](https://qdrant.tech/documentation/concepts/storage/): 
+    - **in-memory** storage, which stores all vectors in RAM and has the highest speed since disk access is required only for persistence)
+    - **memmap** storage, which creates a virtual address space associated with the file on disk. You can have a look at that directory in a *nix system with `tree qdrant_storage -L 2`, and something similar to the following output should come up for you.
 
-The [points](https://qdrant.tech/documentation/points/) are the central entity Qdrant operates with, and these contain records consisting of a vector, an optional `id` and an optional `payload` (which we'll talk more about in the next section).
+        ```bash
+        qdrant_storage
+        ├── aliases
+        │   └── data.json
+        ├── collections
+        │   └── my_first_collection
+        └── raft_state
+        ```
+    
+2. You used `client.recreate_collection()`, which can be used more than once to create new collections with or without the same name. Therefore, please make sure you do not run this command multiple times and accidentally recreate a collection. 
 
-The optional id can be represented by [unsigned integers](https://en.wikipedia.org/wiki/Integer_(computer_science)) or [UUID(https://en.wikipedia.org/wiki/Universally_unique_identifier)]s but, for our use case, we will use a straightforward range of numbers.
+Instead, to create a brand new collection that cannot be recreated, use the `client.create_collection()` method.
 
-Let's us [NumPy](https://numpy.org/) to create a matrix of fake data containing 1,000 vectors and 100 dimensions, and then represent the values as `float64` numbers between -1 and 1. For simplicity, let's imagine that each of these vectors represents one of our favorite songs, and that each column represents a unique characteristic of the song, for example, the tempo, the beats, the pitch of the voice of the singer(s), etc.
+The created collection will hold vectors of 100 dimensions and the distance metric has been set to Cosine Similarity.
+
+Now that we know how to create collections, let's create a bit of dummy data and add some vectors to it.
+
+### 3.1 Adding points
+
+[Points](https://qdrant.tech/documentation/concepts/points/) are a central entity that Qdrant operates with. They contain records consisting of a vector, an optional `id`, and an optional `payload`.
+
+The optional id can be represented by [unsigned integers](https://en.wikipedia.org/wiki/Integer_(computer_science)) or [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier)s. For this tutorial, we will use a straightforward range of numbers.
+
+You can use [NumPy](https://numpy.org/) to create a matrix of dummy data containing 1,000 vectors and 100 dimensions.  Then, you can represent the values as `float64` numbers between -1 and 1. For simplicity, imagine that each of these vectors represents one of our favorite songs. Then, each column would represent a unique characteristic of the song; e.g. the tempo, the beats, the pitch of the voice(s) of the singer(s).
 
 
 ```python
@@ -195,7 +208,7 @@ type(data[0, 0]), data[:2, :20]
 
 
 
-Let's now create an index for our vectors.
+Now you can create an index for your vectors.
 
 
 ```python
@@ -210,9 +223,9 @@ index[-10:]
 
 
 
-Once a collection has been created, we can fill it in with the command `client.upsert()`. We'll need the collection's name and the appropriate uploading process from our `models` module, in this case, [`Batch`](https://qdrant.tech/documentation/points/#upload-points).
+Once a collection has been created, you can fill it in with `client.upsert()`. You need to provide the collection's name and the appropriate uploading process from our `models` module, in this case, [`Batch`](https://qdrant.tech/documentation/points/#upload-points).
 
-One thing to note is that Qdrant can only take in native Python iterables like lists and tuples. This is why you'll notice the `.tolist()` method attached to our numpy matrix,`data`, below.
+**Note:** Qdrant can only take in native Python iterables like lists and tuples. This is why you will notice the `.tolist()` method attached to our `data` matrix below.
 
 
 ```python
@@ -232,7 +245,7 @@ client.upsert(
 
 
 
-We can retrieve specific points based on their ID (for example, artist X with ID 100) and get some additional information from that result.
+You can retrieve specific points based on their ID (for example, song X with ID 100) and get some additional information from that result.
 
 
 ```python
@@ -250,7 +263,7 @@ client.retrieve(
 
 
 
-We can also update our collection one point at a time, for example, as new data comes in.
+You can also update the collection one point at a time; e.g. as new data is coming in.
 
 
 ```python
@@ -278,7 +291,7 @@ client.upsert(
 
 
 
-We can also delete it in a straightforward fashion.
+We can also delete a point in a straightforward fashion.
 
 
 ```python
@@ -286,7 +299,7 @@ We can also delete it in a straightforward fashion.
 client.count(
     collection_name=my_collection, 
     exact=True,
-) 
+)
 ```
 
 
@@ -331,11 +344,11 @@ client.count(
 
 ### 3.2 Payloads
 
-Qdrant has incredible features on top of speed and reliability, and one of its most useful ones is without a doubt the ability to store additional information alongside the vectors. In Qdrant's terminology, this information is considered a [payload](https://qdrant.tech/documentation/payload/) and it is represented as JSON objects. With these payloads, not only can you get information back when you search in the database, but you can also filter your search by the parameters in the payload, and we'll see how in a second.
+With Qdrant you can store additional information alongside vectors. This is called a [payload](https://qdrant.tech/documentation/payload/) and it is represented as JSON objects. With these payloads, not only can you retrieve information when you search the database, but you can also filter your search by the parameters in the payload, and we'll see how in a second.
 
-Imagine the fake vectors we created actually represented a song. If we were building a semantic search system for songs then, naturally, the things we would want to get back would be the song itself (or an URL to it), the artist, maybe the genre, and so on.
+Following the narrative that our dummy vectors "represent a song," in a semantic search system for this kind of data, you would want to retrieve the song file, its URL, the artist or the genre, among others.
 
-What we'll do here is to take advantage of a Python package call `faker` and create a bit of information to add to our payload and see how this functionality works.
+We will take advantage of a Python package called `faker` and create a bit of fake information to add to our payload to test this functionality.
 
 
 ```python
@@ -355,7 +368,7 @@ fake_something.name()
 
 
 
-For each vector, we'll create list of dictionaries containing the artist, the song (as a combination of 3 random words), a url to the song is at (say, s3), the year in which it was released, and the country where it originated from.
+For each vector, you can create list of dictionaries containing the artist's name, the song, a url to the song, the year in which it was released, and the country where it originated from.
 
 
 ```python
@@ -396,7 +409,7 @@ payload[:3]
 
 
 
-We can upsert our Points (ids, data, and payload), with the same `client.upsert()` method we used earlier, and we can retrieve any one song with the `client.retrieve()` method.
+You can upsert your Points (ids, data, and payload), with the same `client.upsert()` method you used earlier. 
 
 
 ```python
@@ -416,6 +429,8 @@ client.upsert(
     UpdateResult(operation_id=3, status=<UpdateStatus.COMPLETED: 'completed'>)
 
 
+
+If you want to retrieve this info, use the `client.retrieve()` method.
 
 
 ```python
@@ -439,7 +454,7 @@ type(resutls), resutls
 
 
 
-What we got back is a list with records and each element inside a record can be accessed as an attribute, e.g. `.payload` or `.id`.
+The response is a list with records and each element inside a record can be accessed as an attribute, e.g. `.payload` or `.id`.
 
 
 ```python
@@ -469,13 +484,13 @@ resutls[0].id
 
 
 
-Next, we'll use our payload it to search.
+Next, you will use the payload to conduct a search query.
 
 ### 3.3 Search
 
-Now that we have our vectors with an ID and a payload, we can explore a few of ways in which we can search for content when, in our use case, new music gets selected. Let's check it out.
+Now that you have your vectors with an ID and a payload, you can start searching for content when new music gets selected. 
 
-Say, for example, that a new song (like ["living la vida loca"](https://www.youtube.com/watch?v=p47fEXGabaY&ab_channel=RickyMartinVEVO) by Ricky Martin) comes in and our model immediately transforms it into a vector. Since we don't want a large amount of values back, let's limit the search to a few points.
+Assume that a new song (like ["living la vida loca"](https://www.youtube.com/watch?v=p47fEXGabaY&ab_channel=RickyMartinVEVO) by Ricky Martin) comes in and our model immediately transforms it into a vector. Since we don't want a large amount of values back, let's limit the search to a few points.
 
 
 ```python
@@ -500,7 +515,7 @@ client.search(
 
 
 
-Now imagine that we only want Australian songs recommended to us. For this, we can filter the query using the information in the payload. We'll first create a filter object and pass it to our search method as an argument to the parameter `query_filter=`.
+Assume you only want Australian songs recommended to you. For this, you can filter the query using the information in the payload. You have to first create a filter object and then pass it to the search method as an argument to the parameter `query_filter=`.
 
 
 ```python
@@ -535,7 +550,7 @@ client.search(
 
 
 
-Lastly, say we want aussie songs but we don't care how new or old these songs are. Let's exclude the yearfrom the payload.
+Lastly, assume we want aussie songs but we don't care how new or old these songs are. Exclude the year from the payload.
 
 
 ```python
@@ -572,27 +587,24 @@ client.clear_payload(
 )
 ```
 
-## 4. Recommendations
+## 4. Recommendation systems
 
-A recommendation system is a technology that suggests items or content to users based on their preferences, interests, or past behavior. It's like having a knowledgeable friend who can recommend movies, books, music, or products that you might enjoy.
+A recommendation system is a technology that suggests items or content to users based on their preferences, interests, or past behavior. In its most widely-used form, recommendation systems work by analyzing data about you and other users. The system looks at your previous choices, such as movies you've watched, products you've bought, or articles you've read. It then compares this information with data from other people who have similar tastes or interests. 
 
-In its most widely-used form, recommendation systems work by analyzing data about you and other users. The system looks at your previous choices, such as movies you've watched, products you've bought, or articles you've read, and it then compares this information with data from other people who have similar tastes or interests. These systems are used in various companies such as Netflix, Amazon, Tik-Tok, and Spotify. They aim to personalize your experience, save you time searching for things you might like, or introduce you to new and relevant content that you may not have discovered otherwise.
+Such systems are used in various companies such as Netflix, Amazon, Tik-Tok, and Spotify. They aim to personalize your experience, save you time searching for things you might like, or introduce you to new and relevant content that you may not have discovered otherwise.
 
-In a nutshell, a recommendation system is a smart tool that helps you discover new things you'll probably enjoy based on your preferences and the experiences of others.
+Qdrant's API supports such a system, letting you account for user feedback. For example, you can recommend songs based on user likes (👍) or exclude similar ones to content users have disliked (👎).
 
-Qdrant offers a convenient API that allows you to take into account user feedback by including similar songs to those the user have already liked (👍), or, conversely, by excluding songs that are similar to those the user has signal it did not like (👎).
+To do this, use the `client.recommend()` method and consider the following elements:
 
-The method is straightforward to implement via the `client.recommend()` method, and it provides enough flexibility that the logic on how the feedback gets capture can rest in the hands of the developers at your organization. So, what do you need to keep in mind when making recommendations with Qdrant?
+- `collection_name=` - the collection from which the vectors are selected
+- `query_filter=` - optional filter to apply to your search
+- `query_vector=` - optional search vector
+- `negative=` - optionally, specify the `id` of disliked songs to exclude other semantically similar songs
+- `positive=` - in case of liked songs, specify their `id` to exclude similar songs (required)
+- `limit=` - specifies how many songs to show to the user
 
-- `collection_name=` - from which collection are we selecting vectors.
-- `query_filter=` - which filter will we apply to our search, if any.
-- `negative=` - are there any songs the user explicitly didn't like? If so, let's use the `id` of these songs to exclude semantically similar ones.
-- `positive=` - are there any songs the user explicitly liked? If so, let's use the `id` of these songs to include semantically similar ones.
-- `limit=` - how many songs should we show our user.
-
-One last to note is that the `positive=` parameter is a required one but the negative one isn't/
-
-With this new knowledge under our sleeves, imagine there are two songs, "[Suegra](https://www.youtube.com/watch?v=p7ff5EntWsE&ab_channel=RomeoSantosVEVO)" by Romeo Santos and "[Worst Behavior](https://www.youtube.com/watch?v=U5pzmGX8Ztg&ab_channel=DrakeVEVO)" by Drake represented by the ids 17 and 120 respectively. Let's see what we would get with the former being a 👍 and the latter being a 👎.
+Imagine there are two songs, "[Suegra](https://www.youtube.com/watch?v=p7ff5EntWsE&ab_channel=RomeoSantosVEVO)" by Romeo Santos and "[Worst Behavior](https://www.youtube.com/watch?v=U5pzmGX8Ztg&ab_channel=DrakeVEVO)" by Drake represented by the ids 17 and 120 respectively. Let's see what we would get with the former being a 👍 and the latter being a 👎.
 
 
 ```python
@@ -637,7 +649,7 @@ client.recommend(
 
 
 
-Notice that, while the similarity scores are completely random for this example, it is important that we pay attention to the scores we get back when serving recommendations in production. Even if we get 5 vectors back, it might more useful to show random results rather than vectors that are 0.012 similar to the query vector. With this in mind, we can actually set a threshold for our vectors with the `score_threshold=` parameter.
+Notice that, while the similarity scores are completely random for this example, it is important to we pay attention to the scores retrieved when serving recommendations in production. Even if you get 5 vectors back, it might be more useful to show random results, rather than vectors that are 0.012 similar to the query vector. With this in mind, you can actually set a threshold for our vectors with the `score_threshold=` parameter.
 
 
 ```python
@@ -662,7 +674,7 @@ client.recommend(
 
 
 
-Lastly, we can add filters in the same way as we did before. Note that these filters could be tags that your users get to pick such as, for example, genres including `reggeaton`, `bachata`, and `salsa` (sorry Drake), or the language of the song.
+Lastly, you can add filters in the same way as you did before. Note that these filters could be tags that your users get to pick such as, for example, genres including `reggeaton`, `bachata`, and `salsa` (sorry Drake), or the language of the song.
 
 
 ```python
@@ -693,7 +705,7 @@ That's it! You have now gone over a whirlwind tour of vector databases and are r
 
 ## 5. Conclusion
 
-To wrap up, we have explored a bit of the fascinating world of vector databases, and we learned that these databases provide efficient storage and retrieval of high-dimensional vectors, making them ideal for similarity-based search tasks and recommendation systems. Both of these use cases can be applied in a variety of industries while helping us unlock new levels of information retrieval. In particular, recommendation systems built with Qdrant provide developers with enough flexibility to add and subtract data points that users liked or dislike, respectively, and even set up a threshold for how similar a recommendation must be before our applications can serve it.
+To wrap up, we have explored a bit of the fascinating world of vector databases, and we learned that these databases provide efficient storage and retrieval of high-dimensional vectors, making them ideal for similarity-based search tasks and recommendation systems. Both of these use cases can be applied in a variety of industries while helping us unlock new levels of information retrieval. In particular, recommendation systems built with Qdrant provide developers with enough flexibility to add and subtract data points that users liked or disliked, respectively, and even set up a threshold for how similar a recommendation must be before our applications can serve it.
 
 We can't wait to see what cool applications you build with Qdrant.
 
