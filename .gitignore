@@ -4,3 +4,4 @@ qdrant_101/notes
 .ipynb_checkpoints
 qdrant_101_image_data/vecs.npy
 data
+qdrant_101_image_data/vectors.npy
