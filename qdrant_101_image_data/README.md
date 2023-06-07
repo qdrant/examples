@@ -5,16 +5,6 @@
 In this tutorial, you will learn how use semantic search for accurate skin cancer image comparison usign Qdrant and the 
 Hugging Face's `transformers` and `datasets` libraries.
 
-## Table of Contents
-
-1. Overview
-2. Set Up
-3. Image Embeddings
-4. Semantic Search
-5. Improving our Search Results
-6. Putting it all Together
-7. Conclusion
-
 ## 1. Overview
 
 This tutorial aims to provide an in-depth walkthrough of how to employ semantic search techniques with image data. In particular, 
