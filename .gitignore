@@ -3,3 +3,4 @@ qdrant_storage/
 qdrant_101/notes
 .ipynb_checkpoints
 qdrant_101_image_data/vecs.npy
+data
