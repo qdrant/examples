@@ -5,3 +5,4 @@ qdrant_101/notes
 qdrant_101_image_data/vecs.npy
 data
 qdrant_101_image_data/vectors.npy
+qdrant_101_image_data/image_search_app.py
