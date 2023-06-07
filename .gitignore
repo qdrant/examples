@@ -1,3 +1,4 @@
 data/sample/*
 qdrant_storage
 .ipynb_checkpoints
+data
