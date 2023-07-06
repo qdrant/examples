@@ -1,0 +1,6 @@
+jupyter
+pandas
+sentence_transformers
+qdrant_client~=1.3.0
+ipyplot
+pyarrow
