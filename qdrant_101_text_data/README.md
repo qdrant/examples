@@ -2,23 +2,23 @@
 
 ![qdrant](../images/crab_nlp.png)
 
-Welcome to a tutorial on Natural Language Processing and Vector Databases! Here, we will explore how these two exciting technologies work together via Qdrant, a vector similarity search engine that provides a production-ready service with a convenient API to store, search, and manage vectors with an additional payload.
+This tutorial will show you how to use Qdrant to develop a semantic search service. At its core, this service will harness Natural Language Processing (NLP) methods and use Qdrant's API to store, search, and manage vectors with an additional payload.
 
 ## Table of Contents
 
 1. Learning Outcomes
 2. Overview
-3. Before We Get Started
-4. NLP
-    - The Task & The Data
-    - Exploration
-    - GPT-2 Embeddings
+3. Prerequisites
+4. Basic concepts
+    - Initial setup
+    - Examine the dataset
+    - Tokenize and embed data
 5. Semantic Search with Qdrant
 6. Recommendations API
 7. Conclusion
 8. Resources
 
-## 1. Learning Outcomes
+## 1. Learning outcomes
 
 By the end of this tutorial, you will be able to
 - Generate embeddings from text data.
@@ -30,17 +30,19 @@ By the end of this tutorial, you will be able to
 
 Natural Language Processing (NLP) is a branch of artificial intelligence that focuses on the interaction between computers and human language. It involves teaching computers to understand, interpret, and generate human language in a way that is both meaningful and useful. NLP techniques can help us with tasks such as text classification, named entity recognition, sentiment analysis, and language generation.
 
-Vector Databases, on the other hand, are a type of database that specializes in storing and querying high-dimensional vectors. In the context of NLP, vectors are numerical representations of words, sentences, or documents that capture their semantic meaning. These vector representations, often referred to as word embeddings or document embeddings, transform textual data into a numerical format that machines can easily process and analyze.
+Vector databases specialize in storing and querying high-dimensional vectors. In the context of NLP, vectors are numerical representations of words, sentences, or documents that capture their semantic meaning. These vector representations, often referred to as word embeddings or document embeddings, transform textual data into a numerical format that machines can easily process and analyze.
 
-Vector Databases serve as efficient storage systems for these vector representations, allowing for fast and accurate similarity search. They enable users to find similar words, sentences, or documents based on their semantic meaning rather than relying solely on exact matches or keywords. By organizing vectors in a way that facilitates quick retrieval and comparison, Vector Databases are instrumental in powering various NLP applications, including information retrieval, recommendation systems, semantic search, and content clustering.
+Vector databases serve as efficient storage systems for these vector representations, allowing for fast and accurate similarity searches. They enable users to find similar words, sentences, or documents based on their semantic meaning rather than relying solely on exact matches or keywords. By organizing vectors in a way that facilitates quick retrieval and comparison, Vector databases are instrumental in powering various NLP applications, including information retrieval, recommendation systems, semantic search, and content clustering.
 
-The connecting dot between NLP and Vector Databases lies in the importance of vector representations in NLP tasks. Vector representations enable NLP algorithms to understand the contextual relationships and semantic meaning of textual data. By leveraging Vector Databases, NLP systems can efficiently store and retrieve these vector representations, making it easier to process and analyze large volumes of textual data.
+NLP and vector databases are connected through vector representations in NLP tasks. Vector representations enable NLP algorithms to understand the contextual relationships and semantic meaning of textual data. By leveraging Vector Databases, NLP systems can efficiently store and retrieve these vector representations, making it easier to process and analyze large volumes of textual data.
 
-Throughout this tutorial, we will delve deeper into the fundamentals of NLP and Vector Databases. In particular, we will learn (at a high-level) how to use transformers to create embeddings for a corpus of news, and how to use Qdrant to search and recommend the best matches to a chosen document.
+Throughout this tutorial, we will delve deeper into the fundamentals of NLP and Vector Databases. You will learn how to create embeddings for a sample dataset of newspaper articles via transformers. After that, you will use Qdrant to store, search and recommend best matches for a chosen newspaper article.
 
-## 3. Before We Started
+## 3. Prerequisites
 
-In order to use Qdrant, you will need to pull the latest image from docker hub with the command `docker pull qdrant/qdrant`. Next, you can initialize Qdrant with the following command.
+To get started, use the latest Qdrant Docker image: `docker pull qdrant/qdrant`. 
+
+Next, initialize Qdrant with:
 
 ```sh
 docker run -p 6333:6333 \
@@ -48,7 +50,7 @@ docker run -p 6333:6333 \
     qdrant/qdrant
 ```
 
-Now that you have Qdrant up and running, your next step is to set up a virtual environment with the packages we'll be using. You can do so via the following commands.
+Next, set up a virtual environment and install relevant packages:
 
 ```sh
 # with mamba or conda
@@ -63,50 +65,42 @@ source venv/bin/activate
 pip install qdrant-client transformers datasets torch sentence-transformers
 ```
 
-After your have your environment ready, let's get started with Qdrant.
+## 4. Basic concepts
 
-## 4. NLP & Vector Databases
-
-The most common use case you will find at the time of writing, will likely involve large language models. You might have heard of models like [GPT-4](https://openai.com/product/gpt-4), [Codex](https://openai.com/blog/openai-codex), and [PaLM-2](https://ai.google/discover/palm2) which are powering incredible tools such as [ChatGPT](https://openai.com/blog/chatgpt), [GitHub Copilot](https://github.com/features/copilot), and [Bard](https://bard.google.com/?hl=en), respectively. These three models are part of a family of deep learning architectures called [transformers](https://arxiv.org/abs/1706.03762), which are known for their ability to learn long-range dependencies between words in a sentence. This ability to learn from text makes them well-suited for tasks such as machine translation, text summarization, and question answering.
+You might have heard of models like [GPT-4](https://openai.com/product/gpt-4), [Codex](https://openai.com/blog/openai-codex), and [PaLM-2](https://ai.google/discover/palm2) which are powering incredible tools such as [ChatGPT](https://openai.com/blog/chatgpt), [GitHub Copilot](https://github.com/features/copilot), and [Bard](https://bard.google.com/?hl=en), respectively. These three models are part of a family of deep learning architectures called [transformers](https://arxiv.org/abs/1706.03762). Transformers are known for their ability to learn long-range dependencies between words in a sentence. This ability to learn from text makes them well-suited for tasks such as machine translation, text summarization, and question answering. The transformers architecture has been incredibly influential in the field of machine learning, and one of the tools at the heart of this is the [`transformers`](https://huggingface.co/docs/transformers/index) library.
 
 Transformer models work by using a technique called attention, which allows them to focus on different parts of a sentence when making predictions. For example, if you are trying to translate a sentence from English to Spanish, the transformer model will use attention to focus on the words in the English sentence that are most important for the translation into Spanish.
 
 One analogy that can be used to explain transformer models is to think of them as a group of people who are trying to solve a puzzle. Each person in the group is given a different piece of the puzzle, and they need to work together to figure out how the pieces fit together. The transformer model is like the group of people, and the attention mechanism is like the way that the people in the group communicate with each other.
 
-In a more concise way, transformer models are a type of machine learning model that can learn long-range dependencies between words in a sentence by using (or paying 😉) attention.
+Transformers are essential to this tutorial. Your initial task is to 1) load sample data, 2) transform it and 3) create embeddings. You will then store the embeddings 4) in the Qdrant vector database and 5) retrieve the data using a recommendation system.
 
-In NLP, vector databases are used to store word embeddings. Word embeddings are vector representations of words that capture their semantic meaning, and these are used to improve the performance of different NLP tasks.
+### 4.1 Initial setup
 
-The transformers architecture has been incredibly influential in the field of machine learning, and one of the tools at the heart of this is the [`transformers`](https://huggingface.co/docs/transformers/index) library developed by the Hugging Face team. With it, getting embeddings from a corpus of text can be done in a very straightforward way.
+In this tutorial, you will create a newspaper article recommendation system. When the user chooses an article, the system will suggest other articles that are similar. 
 
-Before we get started with the model, let's talk about the use case we will be covering here.
-
-### 4.1 The Task & The Data
-
-> We have been given the **task of creating a system that will recommend the most similar articles to any one article chosen by a user.** 
-
-The dataset we will use is called the **AG News** dataset and here is a description from its [dataset card in Hugging Face](https://huggingface.co/datasets/ag_news):
+You will use the **AG News** [sample data set from HuggingFace](https://huggingface.co/datasets/ag_news):
 
 > "AG is a collection of more than 1 million news articles. News articles have been gathered from more than 2000 news sources by ComeToMyHead in more than 1 year of activity. ComeToMyHead is an academic news search engine which has been running since July, 2004. The dataset is provided by the academic comunity for research purposes in data mining (clustering, classification, etc), information retrieval (ranking, search, etc), xml, data compression, data streaming, and any other non-commercial activity. For more information, please refer to the link http://www.di.unipi.it/~gulli/AG_corpus_of_news_articles.html"
 
-With that out of the way, let's download our dataset and load into our session.
+### 4.2 Load sample dataset
+
+Use HuggingFace's [`datasets`](https://huggingface.co/docs/datasets/index) library to download the dataset and load it into your session. This library is quick, efficient and will allow you to manipulate unstructured data in other ways.
+
+The `load_dataset` function directly downloads the dataset from the [HuggingFace Data Hub](https://huggingface.co/datasets) to your local machine.
 
 
 ```python
 from datasets import load_dataset
 ```
 
+Indicate that you want to **split** the dataset into a `train` set only. This avoids creating partitions.
+
 
 ```python
 dataset = load_dataset("ag_news", split="train")
 dataset
 ```
-
-    Found cached dataset ag_news (/home/ramonperez/.cache/huggingface/datasets/ag_news/default/0.0.0/bc2bcb40336ace1a0374767fc29bb0296cdaf8a6da7298436239c54d79180548)
-
-
-
-
 
     Dataset({
         features: ['text', 'label'],
@@ -115,15 +109,9 @@ dataset
 
 
 
-If you have never used HuggingFace's [`datasets`](https://huggingface.co/docs/datasets/index) library you might be a little puzzled regarding what just happened. Let's break it apart.
+### 4.3 Examine the dataset
 
-- The `datasets` library is a tool that allows us to manipulate unstructured data in a very efficient way by using [Apache Arrow](https://arrow.apache.org/) under the hood. It has a lot of useful functionalities for massaging and shaping up the data in whatever way we need it to be for our task. (It is safe to call it the pandas of unstructured data.)
-- Next, we imported the `load_dataset` function and used it to download the dataset from the [HuggingFace Data Hub](https://huggingface.co/datasets) directly into our PC's.
-- Lastly, by indicating that we want to "split" our dataset into a `train` set only, we are effectively indicating that we do not want any partitions.
-
-Let's have a look at a couple of samples.
-
-### 4.2 Exploration
+Now that we have loaded the dataset, let's look at some sample articles: 
 
 
 ```python
@@ -159,7 +147,9 @@ for i in range(5):
     
 
 
-One nice feature of HuggingFace datasets' objects is that we can switch effortlessly to a pandas dataframe by using the method `.pandas()`, and this can come in handy when we want to manipulate and plot our data. Let's let's extract the class names of news articles and plot the frequency with which they appear. 
+You can switch to a pandas dataframe by using the method `.to_pandas()`. This can come in handy when you want to manipulate and plot the data. 
+
+Here you will extract the class names of news articles and plot the frequency with which they appear:
 
 
 ```python
@@ -180,11 +170,16 @@ id2label = {str(i): label for i, label in enumerate(dataset.features["label"].na
 
 
     
-![png](02_qdrant_101_text_files/02_qdrant_101_text_22_0.png)
+![png](qdrant_and_text_data_files/qdrant_and_text_data_25_0.png)
     
 
 
-As you can see, we have a very well-balanced dataset at our disposal. Let's look at the average length of news per class label. We will write a function for this and map to all of the elements in our dataset. Note that `'length_of_text'` will be the new column in our dataset.
+As you can see, the dataset is well balanced. 
+
+What if you want to know the average length of text per each class label? 
+
+Write a function for this and map to all of the elements in the dataset. 
+`'length_of_text'` will be the new column in the dataset.
 
 
 ```python
@@ -195,11 +190,6 @@ def get_lenght_of_text(example):
 dataset = dataset.map(get_lenght_of_text)
 dataset[:10]['length_of_text']
 ```
-
-    Loading cached processed dataset at /home/ramonperez/.cache/huggingface/datasets/ag_news/default/0.0.0/bc2bcb40336ace1a0374767fc29bb0296cdaf8a6da7298436239c54d79180548/cache-e971d9966c1fdaf5.arrow
-
-
-
 
 
     [144, 266, 232, 256, 234, 239, 215, 252, 414, 147]
@@ -218,25 +208,23 @@ dataset[:10]['length_of_text']
 
 
     
-![png](02_qdrant_101_text_files/02_qdrant_101_text_25_0.png)
+![png](qdrant_and_text_data_files/qdrant_and_text_data_28_0.png)
     
 
 
 The length of characters in the news articles seem to be quite similar for all the labels, and that's okay as very large documents might need to be broken apart before we get to feed them to our model. 
 
-### 4.3 GPT-2 Embeddings
+### Tokenize and embed data using GPT-2 
 
+Your next step is to use a pre-trained model to tokenize the data and create an embedding layer based on it.
 
+Tokenizing is breaking down a sentence into smaller pieces called "tokens". These tokens can be words, numbers, curly brackets, or even punctuation marks. This process helps computers understand and analyze text more easily because they can treat each token as a separate unit and work with them individually.
 
-Our next step will be to use a pre-trained model to tokenize our data and create an embedding layer based on it.
+The model you will use to tokenize our news articles and extract the embeddings is [GPT-2](https://huggingface.co/gpt2). GPT-2 is a powerful language model created by OpenAI, which has been trained on vast amounts of text from the Internet. You can think of it as an AI that can generate human-like text and answer questions based on what it has learned. GPT-2 can be used for a variety of things, like writing articles, creating chatbots, generating story ideas, or even helping with language translation.
 
-Tokenization is like breaking down a sentence into smaller pieces called "tokens." These tokens can be words, numbers, curly brackets, or even punctuation marks. This process helps computers understand and analyze text more easily because they can treat each token as a separate unit and work with them individually.
+The example below takes inspiration from an example available on Chapter 9 of [Natural Language Processing with Transformers](https://transformersbook.com/) by Lewis Tunstall, Leandro von Werra, and Thomas Wolf. If you would like to use a different model to follow along, you can find all of the models available at [Hugging Face's model hub](https://huggingface.co/models)
 
-The model we will use to tokenize our news articles and extract the embeddings is [GPT-2](https://huggingface.co/gpt2). GPT-2 is a powerful language model created by OpenAI, and it is like a smart computer program that has been trained on a lot of text from the internet. You can think of it as an AI that can generate human-like text and answer questions based on what it has learned. GPT-2 can be used for a variety of things, like writing articles, creating chatbots, generating story ideas, or even helping with language translation.
-
-In order to tokenize our corpus, we will use two classes from the `transformers` library, AutoTokenizer and AutoModel, and these will make use of the version of GPT-2 we give them. The example below takes inspiration from an example available on Chapter 9 of the excellent book, [Natural Language Processing with Transformers](https://transformersbook.com/) by Lewis Tunstall, Leandro von Werra, and Thomas Wolf.
-
-If you would like to use a different model to follow along, you can find all of the models available at [Hugging Face's model hub](https://huggingface.co/models)
+In order to tokenize your dataset, use two classes from the `transformers` library, AutoTokenizer and AutoModel. These will make use of the version of GPT-2 provided. 
 
 
 ```python
@@ -251,7 +239,7 @@ tokenizer = AutoTokenizer.from_pretrained('gpt2')
 model = AutoModel.from_pretrained('gpt2')#.to(device) # switch this for GPU
 ```
 
-Before we walk through an example of tokenization and embedding extraction, we will need to set a padding token for GPT-2. In natural language processing (NLP), padding refers to adding extra tokens to make all input sequences the same length. When processing text data, it's common for sentences or documents to have different lengths. However, many machine learning models require fixed-size inputs. Padding solves this issue by adding special tokens (such as zeros) to the shorter sequences, making them equal in length to the longest sequence in the dataset. For example, say you have a set of sentences and you want to process them using a model that requires fixed-length input, you may pad the sequences to match the length of the longest sentence, let's say five tokens. The padded sentences would look like this:
+First, you will need to set a padding token for GPT-2. In natural language processing (NLP), padding refers to adding extra tokens to make all input sequences the same length. When processing text data, it's common for sentences or documents to have different lengths. However, many machine learning models require fixed-size inputs. Padding solves this issue by adding special tokens (such as zeros) to the shorter sequences, making them equal in length to the longest sequence in the dataset. For example, say you have a set of sentences and you want to process them using a model that requires fixed-length input, you may pad the sequences to match the length of the longest sentence, let's say five tokens. The padded sentences would look like this:
 
 1. "I love cats" -> "I love cats [PAD] [PAD]"
 2. "Dogs are friendly" -> "Dogs are friendly [PAD]"
@@ -284,7 +272,7 @@ tokenizer.pad_token
 tokenizer.pad_token = tokenizer.eos_token
 ```
 
- With that out of the way, let's walk through a quick example.
+Let's go through a quick example:
 
 
 ```python
@@ -301,7 +289,7 @@ inputs
 
 
 
-Our tokenizer will returns an input IDs and an attention mask for every word in our sentence. These IDs are represented internally in the vocabulary of the model. To view our tokens we can use the following method.
+The tokenizer will return an input IDs and an attention mask for every word in the sentence. These IDs are represented internally in the vocabulary of the model. To view your tokens, do the following:
 
 
 ```python
@@ -330,7 +318,7 @@ toks
 
 
 
-We can always go back to a sentence as well.
+You can always go back to a sentence as well.
 
 
 ```python
@@ -344,7 +332,7 @@ tokenizer.convert_tokens_to_string(toks)
 
 
 
-And if you are curious about how large is the vocabulary in your model, you can always access it with the method `.vocab_size`.
+If you are curious about how large is the vocabulary in your model, you can always access it with the method `.vocab_size`.
 
 
 ```python
@@ -358,7 +346,7 @@ tokenizer.vocab_size
 
 
 
-Now it is time to pass the inputs we got from our tokenizer to our model and examine what we'll get in return.
+Now pass the inputs from the tokenizer to your model and check out the response:
 
 
 ```python
@@ -382,7 +370,9 @@ embs.last_hidden_state.size(), embs[0]
 
 
 
-Notice that we got a tensor of shape `[batch_size, inputs, dimensions]`. The inputs are our tokens and these dimensions are the embedding representation that we want for our sentence rather than each token. So what can we do to get one rather than 15? The answer is **mean pooling**. We are going to take the average of all 15 vectors while paying attention to the most important parts of it. The details of how this is happening are outside of the scope of this tutorial, but please refer to the Natural Language Processing with Transformers book mentioned earlier for a richer discussion on the concepts touched on in this section (including the borrowed functions we are about to use).
+Notice that you got a tensor of shape `[batch_size, inputs, dimensions]`. The inputs are your tokens and these dimensions are the embedding representation that you want for your sentence rather than each token. So what can you do to get one rather than 15? The answer is **mean pooling**. 
+
+You are going to take the average of all 15 vectors while paying attention to the most important parts of it. The details of how this is happening are outside of the scope of this tutorial, but please refer to the Natural Language Processing with Transformers book mentioned earlier for a richer discussion on the concepts touched on in this section (including the borrowed functions we are about to use).
 
 
 ```python
@@ -410,7 +400,7 @@ embedding.shape, embedding[0, :10]
 
 
 
-Now we have everything we need to extract the embedding layers from our corpus of news. The last piece of the puzzle is to create a function that we can map to every news article and extract the embedding layers with. Let's do that using our tokenizer and model from earlier, and, since our dataset contains quite a bit of articles, we'll apply it to a smaller subset of the data.
+Now you have everything you need to extract the embedding layers from our corpus of news. The last piece of the puzzle is to create a function that we can map to every news article and extract the embedding layers with. Use your tokenizer and model from earlier and apply it to a smaller subset of the data (since the dataset is quite large).
 
 
 ```python
@@ -433,10 +423,6 @@ small_set = (
 )
 ```
 
-    Loading cached shuffled indices for dataset at /home/ramonperez/.cache/huggingface/datasets/ag_news/default/0.0.0/bc2bcb40336ace1a0374767fc29bb0296cdaf8a6da7298436239c54d79180548/cache-f5357753235abe0c.arrow
-    Loading cached processed dataset at /home/ramonperez/.cache/huggingface/datasets/ag_news/default/0.0.0/bc2bcb40336ace1a0374767fc29bb0296cdaf8a6da7298436239c54d79180548/cache-84bae01db6f22a9e.arrow
-
-
 
 ```python
 small_set
@@ -452,7 +438,7 @@ small_set
 
 
 
-As you can see, we now have an extra column with the embeddings for our data, and we can use these vector representations to semantically search for other news articles or to recommend similar articles to our users by taking advantage of Qdrant.
+As you can see, there is an extra column with the embeddings for your data. You we can use these vector representations to semantically search for other news articles or to recommend similar articles to our users by taking advantage of Qdrant.
 
 Before we add our news articles to Qdrant, let's create a list of ids for our dataset and a column with the labels to allow our users to get recommendations in a more precise fashion, i.e. by context.
 
@@ -526,7 +512,7 @@ The two modules we'll use the most are the `QdrantClient` and the `models` one. 
 
 As a quick reminder, [collections](https://qdrant.tech/documentation/collections/) are named sets of points among which you can search; [points](https://qdrant.tech/documentation/points/) consist of a vector, an optional id and an optional payload; an id a unique identifier for your vectors, and a [payload](https://qdrant.tech/documentation/payload/) is a JSON object with additional data you can add to your points. Each collection needs a distance metric such as Euclidean Distance, Dot Product, or Cosine Similarity.
 
-We'll start by instantiating our client using `host="localhost"` and `port=6333` (as it is the default we used earlier with docker), and by creating a new collection called, `news_embeddings`.
+Start by instantiating the client using `host="localhost"` and `port=6333`, and by creating a new collection called, `news_embeddings`.
 
 
 ```python
@@ -564,9 +550,7 @@ client.recreate_collection(
 
 
 
-Before we fill in our new collection, we want to create a payload that contains the news domain the article belongs to, plus the article itself. Note that this payload is a list of JSON objects where the key is the name of the column and the value is the label or text of that same column.
-
-Something that could be incredibly useful is to refocus our model to apply named entity recognition to our articles and extract characteristics from the text that could be use to further filter the user's search via the payload. This will be for another tutorial though.
+Before you fill in your new collection, create a payload that contains the news domain the article belongs to, plus the article itself. Note that this payload is a list of JSON objects where the key is the name of the column and the value is the label or text of that same column.
 
 
 ```python
@@ -605,7 +589,7 @@ client.upsert(
 
 
 
-We can verify that our collection has been created by scrolling through the points with the following command.
+Verify that the collection has been created by scrolling through the points with the following command:
 
 
 ```python
@@ -819,7 +803,7 @@ from sentence_transformers import SentenceTransformer, util
 model = SentenceTransformer('all-MiniLM-L6-v2')
 ```
 
-We will call the second embedding feature `embedding_2`.
+We will call the second embedding feature `embedding_2` and extract it from our articles in the same way as before.
 
 
 ```python
@@ -902,24 +886,11 @@ some_txt
 
 
 
-It seems to be talking about IBM and its servers. Let's get the embedding layer for it.
+It seems to be talking about IBM and its servers. What we'll do with this is to use the id of this 
+article to tell Qdrant that we want to see more like it.
 
-
-```python
-query3 = model.encode(the_txt)
-query3[:10]
-```
-
-
-
-
-    array([-0.06654751, -0.03924084,  0.02900439, -0.04977767,  0.03995508,
-           -0.02136424, -0.00713737, -0.01952819,  0.02204445,  0.00150797],
-          dtype=float32)
-
-
-
-They key thing about the recommendation API of Qdrant is that we need to give it at least 1 id for an article that user liked, or gave us a 👍 for.
+They key thing about the recommendation API of Qdrant is that we need at least 1 id for an article 
+that a user liked, or gave us a 👍 for, but the number of negative articles is optional.
 
 
 ```python
@@ -941,8 +912,7 @@ The one above talks about about Google search. Let's see what kind of recommenda
 ```python
 client.recommend(
     collection_name=second_collection,
-    query_vector=query3.tolist(),
-    positive=[article_we_liked['idx']],
+    positive=[some_txt['idx'], article_we_liked['idx']],
     limit=5
 )
 ```
@@ -960,7 +930,8 @@ client.recommend(
 
 Not surprisingly, we get a lot of tech news with decent degrees of similarity.
 
-Let's see what happens when we tell it that we want to see news related to Manchester United, that like news about workers' rights and that we dislike anything related to raising interests rates.
+Let's look at what happens when we tell Qdrant that we want to see news related to the Manchester United 
+football team, that we like news about workers' rights, and that we dislike anything related to raising interests rates.
 
 
 ```python
@@ -1012,8 +983,9 @@ query4 = model.encode(some_other_txt)
 ```python
 client.recommend(
     collection_name=second_collection,
-    query_vector=query4.tolist(),
-    positive=[article_we_liked['idx'], another_article_we_liked['idx']],
+    positive=[
+        some_other_txt['idx'], article_we_liked['idx'], another_article_we_liked['idx']
+    ],
     negative=[article_we_dont_like['idx']],
     limit=8
 )
@@ -1033,14 +1005,15 @@ client.recommend(
 
 
 
-The results seem palatable given our search criteria. Let's try one more without the article we liked about Google search, but this time, we want to set a similarity threshold to make sure get only very relevant results.
+The results seem palatable given the search criteria. Let's see what we get without the 
+article we liked about Google search. Also, this time we want to see only articles that 
+pass a certain similarity threshold to make sure we only get very relevant results back.
 
 
 ```python
 client.recommend(
     collection_name=second_collection,
-    query_vector=query4.tolist(),
-    positive=[another_article_we_liked['idx']],
+    positive=[some_other_txt['idx'], another_article_we_liked['idx']],
     negative=[article_we_dont_like['idx']],
     score_threshold=0.30,
     limit=8
@@ -1057,9 +1030,7 @@ client.recommend(
 
 
 
-That's it! 🙌 
-
-To see all of the collections that we have created today, you can use `client.get_collections`.
+That's it! To see all of the collections that you have created in this tutorial, use `client.get_collections`.
 
 
 ```python
@@ -1073,13 +1044,11 @@ client.get_collections()
 
 
 
-You now have gone over a whirlwind tour of NLP and vector databases and are ready to tackle new challenges. 😎
-
 ## 5. Conclusion
 
-In conclusion, we have explored a bit of the fascinating world of vector databases, natural language processing, transformers, and embeddings. In this tutorial we learned that (1) vector databases provide efficient storage and retrieval of high-dimensional vectors, making them ideal for similarity-based search tasks. (2) Natural language processing enables us to understand and process human language, opening up possibilities for different kinds of useful applications for digital technologies. (3) Transformers, with their attention mechanism, capture long-range dependencies in language and achieve incredible results in different tasks. Finally, embeddings encode words or sentences into dense vectors, capturing semantic relationships and enabling powerful language understanding.
+In this tutorial you have learned that (1) vector databases provide efficient storage and retrieval of high-dimensional vectors, making them ideal for similarity-based search tasks. (2) Natural language processing enables us to understand and process human language, opening up possibilities for different kinds of useful applications for digital technologies. (3) Transformers, with their attention mechanism, capture long-range dependencies in language and achieve incredible results in different tasks. Finally, embeddings encode words or sentences into dense vectors, capturing semantic relationships and enabling powerful language understanding.
 
-By combining these technologies, we can unlock new levels of language understanding, information retrieval, and intelligent systems that continue to push the boundaries of what's possible in the realm of AI.
+By combining these technologies, you can unlock new levels of language understanding, information retrieval, and intelligent systems that continue to push the boundaries of what's possible in the realm of AI.
 
 ## 6. Resources
 

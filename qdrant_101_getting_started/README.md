@@ -599,7 +599,6 @@ To do this, use the `client.recommend()` method and consider the following eleme
 
 - `collection_name=` - the collection from which the vectors are selected
 - `query_filter=` - optional filter to apply to your search
-- `query_vector=` - optional search vector
 - `negative=` - optionally, specify the `id` of disliked songs to exclude other semantically similar songs
 - `positive=` - in case of liked songs, specify their `id` to exclude similar songs (required)
 - `limit=` - specifies how many songs to show to the user
@@ -610,7 +609,6 @@ Imagine there are two songs, "[Suegra](https://www.youtube.com/watch?v=p7ff5EntW
 ```python
 client.recommend(
     collection_name=my_collection,
-    query_vector=living_la_vida_loca,
     positive=[17],
     limit=5
 )
@@ -655,7 +653,6 @@ Notice that, while the similarity scores are completely random for this example,
 ```python
 client.recommend(
     collection_name=my_collection,
-    query_vector=living_la_vida_loca,
     positive=[17],
     negative=[120, 180],
     score_threshold=0.22,
@@ -680,7 +677,6 @@ Lastly, you can add filters in the same way as you did before. Note that these f
 ```python
 client.recommend(
     collection_name=my_collection,
-    query_vector=living_la_vida_loca,
     query_filter=models.Filter(
         must=[models.FieldCondition(key="country", match=models.MatchValue(value="Dominican Republic"))]
     ),
