@@ -108,9 +108,7 @@ import openl3
 import torch
 ```
 
-
-
-```
+```python
 client = QdrantClient(host="localhost", port=6333)
 ```
 
@@ -125,6 +123,7 @@ client.recreate_collection(
     vectors_config=models.VectorParams(size=2048, distance=models.Distance.COSINE)
 )
 ```
+
     True
 
 
@@ -138,6 +137,10 @@ We will be using Huggin Face's [datasets](https://huggingface.co/docs/datasets/i
 data_path = join("..", "data", "ludwig_music_data")
 data_path
 ```
+
+
+
+
     '../data/ludwig_music_data'
 
 
@@ -160,9 +163,12 @@ music_data
 
 
 
-```
+```python
 music_data[115]
 ```
+
+
+
 
     {'audio': {'path': '/home/ramonperez/Tresors/qdrant_org/content/examples/data/ludwig_music_data/mp3/latin/0rXvhxGisD2djBmNkrv5Gt.mp3',
       'array': array([ 0.00000000e+00,  1.24776700e-09, -4.54397187e-10, ...,
@@ -202,6 +208,7 @@ ids = [
 index = [num for num in range(len(music_data))]
 ids[:4]
 ```
+
     ['0010BnyFuw94XFautS2uJp',
      '00RhgYVH6DrHl0SuZWDp8W',
      '01k69xxIQGL94F8IfIkI5l',
@@ -215,6 +222,9 @@ music_data = music_data.add_column("index", index)
 music_data = music_data.add_column("ids", ids)
 music_data[-1]
 ```
+
+
+
 
     {'audio': {'path': '/home/ramonperez/Tresors/qdrant_org/content/examples/data/ludwig_music_data/mp3/latin/7yX4WgUfoPpMKZHgqpaZ0x.mp3',
       'array': array([ 0.00000000e+00, -1.40022882e-09, -4.44221415e-09, ...,
@@ -233,6 +243,9 @@ label_path = join(data_path, "labels.json")
 labels = pd.read_json(label_path)
 labels.head()
 ```
+
+
+
 
 <div>
 <style scoped>
@@ -301,10 +314,13 @@ def get_metadata(x):
 ```
 
 
-```
+```python
 clean_labels = labels['tracks'].apply(get_metadata).reset_index()
 clean_labels.head()
 ```
+
+
+
 
 <div>
 <style scoped>
@@ -395,6 +411,9 @@ clean_labels['subgenres'] = clean_labels.subgenres.apply(get_vals)
 clean_labels['subgenres'].head()
 ```
 
+
+
+
     0    [electronic---synth-pop]
     1            [latin---cubano]
     2           [rock---new wave]
@@ -405,7 +424,7 @@ clean_labels['subgenres'].head()
 
 
 
-```
+```python
 file_path = join(data_path, "mp3", "latin", "*.mp3")
 files = glob(file_path)
 ids = [i.split('/')[-1].replace(".mp3", '') for i in files]
@@ -641,12 +660,16 @@ one_song = join(data_path, "mp3", "latin", "0rXvhxGisD2djBmNkrv5Gt.mp3")
 audio, sr = librosa.core.load(one_song, sr=44100, mono=True)
 audio.shape
 ```
+
+
+
+
     (1322496,)
 
 
 
 
-```
+```python
 player(audio, rate=sr)
 ```
 
@@ -681,7 +704,7 @@ def get_open_embs(batch):
 ```
 
 
-```
+```python
 music_data = music_data.map(get_open_embs, batched=True, batch_size=20)
 music_data
 ```
@@ -707,6 +730,10 @@ tensor, both of shape `[batch, vector]` so let's reshape our song.
 audio2 = audio[None, :]
 audio2.shape
 ```
+
+
+
+
     (1, 1322496)
 
 
@@ -730,7 +757,7 @@ clipwise_output, embedding = at.inference(audio2)
 ```
 
 
-```
+```python
 clipwise_output.shape, embedding.shape
 ```
 
@@ -745,6 +772,9 @@ clipwise_output.shape, embedding.shape
 ```python
 embedding[0, 470:500]
 ```
+
+
+
 
     array([0.       , 0.       , 0.       , 0.       , 0.       , 0.       ,
            3.1233616, 0.       , 0.       , 0.       , 0.       , 0.       ,
@@ -769,17 +799,10 @@ def get_panns_embs(batch):
 ```
 
 
-```
+```python
 music_data = music_data.map(get_panns_embs, batched=True, batch_size=8)
 music_data
 ```
-
-
-    Map:   0%|          | 0/979 [00:00<?, ? examples/s]
-
-
-
-
 
     Dataset({
         features: ['audio', 'index', 'ids', 'panns_embeddings'],
@@ -806,13 +829,6 @@ model = AutoModel.from_pretrained('facebook/wav2vec2-base').to(device)
 feature_extractor = AutoFeatureExtractor.from_pretrained('facebook/wav2vec2-base')
 ```
 
-    /home/ramonperez/anaconda/envs/qdrant101/lib/python3.10/site-packages/transformers/configuration_utils.py:380: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
-      warnings.warn(
-    Some weights of the model checkpoint at facebook/wav2vec2-base were not used when initializing Wav2Vec2Model: ['quantizer.weight_proj.bias', 'quantizer.codevectors', 'project_hid.bias', 'project_q.weight', 'project_q.bias', 'quantizer.weight_proj.weight', 'project_hid.weight']
-    - This IS expected if you are initializing Wav2Vec2Model from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
-    - This IS NOT expected if you are initializing Wav2Vec2Model from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
-
-
 A key step before extracting the features from each song and passing them through the model 
 is to resample the songs 16kHz.
 
@@ -824,7 +840,7 @@ resampled_audio.shape
 ```
 
 
-```
+```python
 inputs = feature_extractor(
     resampled_audio[0], sampling_rate=feature_extractor.sampling_rate, return_tensors="pt",
     padding=True, return_attention_mask=True, truncation=True, max_length=16_000
@@ -832,6 +848,10 @@ inputs = feature_extractor(
 
 inputs['input_values'].shape
 ```
+
+
+
+
     torch.Size([1, 16000])
 
 
@@ -869,7 +889,7 @@ def get_trans_embs(batch):
 ```
 
 
-```
+```python
 music_data = music_data.cast_column("audio", Audio(sampling_rate=16_000))
 music_data = music_data.map(embed_audio, batched=True, batch_size=20)
 music_data
@@ -897,6 +917,10 @@ client.upsert(
     )
 )
 ```
+
+
+
+
     UpdateResult(operation_id=0, status=<UpdateStatus.COMPLETED: 'completed'>)
 
 
@@ -914,9 +938,13 @@ result = client.retrieve(
 ```
 
 
-```
+```python
 result[0].payload
 ```
+
+
+
+
     {'artist': 'La Bottine Souriante',
      'genre': 'latin',
      'name': 'Chant de la luette',
@@ -1028,6 +1056,10 @@ client.search(
     limit=10
 )
 ```
+
+
+
+
     [ScoredPoint(id=150, version=0, score=0.99999994, payload={'artist': 'Celia Cruz', 'genre': 'latin', 'name': 'Cuando Sali De Cuba', 'subgenres': ['latin---salsa'], 'urls': '../data/ludwig_music_data/mp3/latin/19zWrDlXew0Fzouu7a4qhx.mp3'}, vector=None),
      ScoredPoint(id=730, version=0, score=0.9206133, payload={'artist': 'Cartola', 'genre': 'latin', 'name': 'Fita meus olhos', 'subgenres': ['latin---samba'], 'urls': '../data/ludwig_music_data/mp3/latin/5iyRJ796USPTXEO4JXO0gC.mp3'}, vector=None),
      ScoredPoint(id=251, version=0, score=0.9087784, payload={'artist': "Oscar D'León", 'genre': 'latin', 'name': 'Volver a Verte', 'subgenres': ['latin---salsa'], 'urls': '../data/ludwig_music_data/mp3/latin/1kD5EOoZ45kjq50NLfhRGc.mp3'}, vector=None),
@@ -1057,6 +1089,10 @@ client.recommend(
     limit=5
 )
 ```
+
+
+
+
     [ScoredPoint(id=384, version=0, score=0.96683824, payload={'artist': 'Gilberto Santa Rosa', 'genre': 'latin', 'name': 'Perdoname', 'subgenres': ['latin---salsa'], 'urls': '../data/ludwig_music_data/mp3/latin/2qqrgPaRZow7lrLttDL6Im.mp3'}, vector=None),
      ScoredPoint(id=424, version=0, score=0.9633477, payload={'artist': 'Gilberto Santa Rosa', 'genre': 'latin', 'name': 'Amanecer Borincano', 'subgenres': ['latin---salsa'], 'urls': '../data/ludwig_music_data/mp3/latin/39FQfusOwKnPCjOgQHcx6S.mp3'}, vector=None),
      ScoredPoint(id=190, version=0, score=0.9624174, payload={'artist': 'Luigi Texidor', 'genre': 'latin', 'name': 'Mi Testamento', 'subgenres': ['latin---salsa'], 'urls': '../data/ludwig_music_data/mp3/latin/1RIdI5c7RjjagAcMA5ixpv.mp3'}, vector=None),
@@ -1162,7 +1198,7 @@ metadata.query("artist == 'Chayanne'")
 
 
 
-```
+```python
 client.recommend(
     collection_name=my_collection,
     positive=[178, 122],
@@ -1170,6 +1206,10 @@ client.recommend(
     limit=5
 )
 ```
+
+
+
+
     [ScoredPoint(id=546, version=0, score=0.87100524, payload={'artist': '¡Cubanismo!', 'genre': 'latin', 'name': 'El Preguntón', 'subgenres': ['latin---salsa'], 'urls': '../data/ludwig_music_data/mp3/latin/4EH5vM8p1Ibvlz5cgZLHvY.mp3'}, vector=None),
      ScoredPoint(id=85, version=0, score=0.86223793, payload={'artist': '¡Cubanismo!', 'genre': 'latin', 'name': 'Malembe', 'subgenres': ['latin---salsa'], 'urls': '../data/ludwig_music_data/mp3/latin/0efiEWiAFtHrQHTWfeDikg.mp3'}, vector=None),
      ScoredPoint(id=910, version=0, score=0.8605486, payload={'artist': '¡Cubanismo!', 'genre': 'latin', 'name': 'Cubanismo Llegó', 'subgenres': ['latin---salsa'], 'urls': '../data/ludwig_music_data/mp3/latin/7FSSdHxCoyEMfHUP6NdOb2.mp3'}, vector=None),
@@ -1178,8 +1218,8 @@ client.recommend(
 
 
 
-Say we want to get recommendations based on a song we just recently listened to, 
-and the system remembers all of our preferences.
+Say we want to get recommendations based on a song we just recently listened to and liked, 
+and that the system remembers all of our preferences.
 
 
 ```python
@@ -1187,11 +1227,10 @@ marc_anthony_valio_la_pena = music_data[301]
 ```
 
 
-```
+```python
 client.recommend(
     collection_name=my_collection,
-    query_vector=marc_anthony_valio_la_pena['panns_embeddings'],
-    positive=[178, 122, 459],
+    positive=[marc_anthony_valio_la_pena['idx'], 178, 122, 459],
     negative=[385],
     limit=5
 )
@@ -1219,17 +1258,20 @@ samba_songs = models.Filter(
 ```
 
 
-```
+```python
 results = client.recommend(
     collection_name=my_collection,
-    query_vector=marc_anthony_valio_la_pena['panns_embeddings'],
     query_filter=samba_songs,
-    positive=[178, 122, 459],
+    positive=[marc_anthony_valio_la_pena['idx'], 178, 122, 459],
     negative=[385],
     limit=5
 )
 results
 ```
+
+
+
+
     [ScoredPoint(id=540, version=0, score=0.8588973, payload={'artist': 'Tito Puente', 'genre': 'latin', 'name': 'Cual Es La Idea', 'subgenres': ['latin---samba'], 'urls': '../data/ludwig_music_data/mp3/latin/4CNCGwxNp9rnVqo2fzmDYK.mp3'}, vector=None),
      ScoredPoint(id=493, version=0, score=0.8236424, payload={'artist': 'Tito Nieves', 'genre': 'latin', 'name': 'De mi enamórate', 'subgenres': ['latin---samba'], 'urls': '../data/ludwig_music_data/mp3/latin/3nnQUYKWBmHlfm5XpdWqNr.mp3'}, vector=None),
      ScoredPoint(id=92, version=0, score=0.8120091, payload={'artist': 'Tito Puente', 'genre': 'latin', 'name': 'Mambo Gozón', 'subgenres': ['latin---samba'], 'urls': '../data/ludwig_music_data/mp3/latin/0hk1gSyn3wKgdxqF6qaKUZ.mp3'}, vector=None),
@@ -1239,7 +1281,7 @@ results
 
 
 
-```
+```python
 for result in results:
     song, sr = librosa.core.load(result.payload['urls'], sr=44100, mono=True)
     display(player(song, rate=sr))
@@ -1285,24 +1327,13 @@ if music_file:
     st.markdown("## Semantic Search")
     results = client.search(collection_name="music_collection", query_vector=emb[0], limit=4)
     
-    st.header(f"Song: {results[0].payload['name']}")
-    st.subheader(f"Artist: {results[0].payload['artist']}")
-    st.audio(results[0].payload["urls"])
-    
-    st.header(f"Song: {results[1].payload['name']}")
-    st.subheader(f"Artist: {results[1].payload['artist']}")
-    st.audio(results[1].payload["urls"])
-
-    st.header(f"Song: {results[2].payload['name']}")
-    st.subheader(f"Artist: {results[2].payload['artist']}")
-    st.audio(results[2].payload["urls"])
-    
-    st.header(f"Song: {results[3].payload['name']}")
-    st.subheader(f"Artist: {results[3].payload['artist']}")
-    st.audio(results[3].payload["urls"])
+    for result in results:
+        st.header(f"Song: {result.payload['name']}")
+        st.subheader(f"Artist: {result.payload['artist']}")
+        st.audio(result.payload["urls"])
 ```
 
 
-```
+```python
 !streamlit run recsys_app.py
 ```
