@@ -4,15 +4,6 @@ source keys.sh
 
 cargo lambda build --release --bin lambda --arm64 --output-format zip
 
-case $EMBEDDING in
-("COHERE"|"OPEN_AI"))
-  export EMBEDDING_ENV="EMBED_API_KEY=$EMBED_API_KEY"
-  ;;
-"MIGHTY")
-  export EMBEDDING_ENV="MIGHTY_URI=$MIGHTY_URI"
-  ;;
-esac
-
 # Clear previous versions
 aws lambda delete-function-url-config --region $LAMBDA_REGION --function-name $LAMBDA_FUNCTION_NAME
 aws lambda delete-function --region $LAMBDA_REGION --function-name $LAMBDA_FUNCTION_NAME
@@ -21,11 +12,11 @@ aws lambda delete-function --region $LAMBDA_REGION --function-name $LAMBDA_FUNCT
 aws lambda create-function --function-name $LAMBDA_FUNCTION_NAME \
   --handler bootstrap \
   --architectures arm64 \
-  --zip-file fileb://./target/lambda/page-search/bootstrap.zip \
+  --zip-file fileb://./target/lambda/lambda/bootstrap.zip \
   --runtime provided.al2 \
   --region $LAMBDA_REGION \
   --role $LAMBDA_ROLE \
-  --environment "Variables={QDRANT_URI=$QDRANT_URI,QDRANT_API_KEY=$QDRANT_API_KEY,EMBEDDING=$EMBEDDING,$EMBEDDING_ENV}" \
+  --environment "Variables={QDRANT_URI=$QDRANT_URI,QDRANT_API_KEY=$QDRANT_API_KEY,COHERE_API_KEY=$COHERE_API_KEY}" \
   --tracing-config Mode=Active
 
 # Grant public access to the function

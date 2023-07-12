@@ -13,4 +13,4 @@ esac
 
 aws lambda update-function-configuration \
   --function-name $LAMBDA_FUNCTION_NAME \
-  --environment "Variables={QDRANT_URI=$QDRANT_URI,QDRANT_API_KEY=$QDRANT_API_KEY,EMBEDDING=$EMBEDDING,$EMBEDDING_ENV}"
+  --environment "Variables={QDRANT_URI=$QDRANT_URI,QDRANT_API_KEY=$QDRANT_API_KEY,EMBEDDING=$EMBEDDING,COHERE_API_KEY=$COHERE_API_KEY}"

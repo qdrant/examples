@@ -41,21 +41,10 @@ Create a file `keys.sh` in the root of the project and fill it with the followin
 ```bash
 #!/usr/bin/env bash
 
-# Qdrant access parameters
+# Qdrant and Cohere access parameters
 export QDRANT_URI="<url-to-qdrant>"
 export QDRANT_API_KEY="<qdrant-api-key>"
-
-# * use cohere embedding
-#export EMBEDDING="COHERE"
-#export EMBED_API_KEY="<your API key>"
-
-# * use mighty embedding
-export EMBEDDING="MIGHTY"
-export MIGHTY_URI="<url-to-mighty>"
-
-# * use OpenAI embedding
-#export EMBEDDING="OPEN_AI"
-#export EMBED_API_KEY="<your API key>"
+export COHERE_API_KEY="<your API key>"
 
 # Lambda parameters
 export LAMBDA_ROLE=arn:aws:iam::XXXXXXXXXXXX:role/service-role/page-search-role
