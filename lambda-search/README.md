@@ -1,4 +1,4 @@
-# Serverless Semantic Search for your web-site
+# Serverless Semantic Search for Your Website
 
 The project demonstrates how to build a full-fledged semantic search for your web-site using Mighty, Cohere or OpenAI embeddings, [Qdrant](https://qdrant.tech/) vector search engine and [AWS Lambda](https://aws.amazon.com/lambda/).
 
