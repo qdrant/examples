@@ -15,19 +15,14 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 
 #[derive(Deserialize)]
-struct OpenaiResponse {
-    data: OpenaiData,
-}
-
-#[derive(Deserialize)]
-struct OpenaiData {
-    embedding: Vec<f32>,
+struct CohereResponse {
+    outputs: Vec<Vec<f32>>
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::builder().build()?;
-    let openai_api_key = std::env::var("OPENAI_API_KEY").expect("need OPENAI_API_KEY set");
+    let cohere_api_key = std::env::var("COHERE_API_KEY").expect("need COHERE_API_KEY set");
     let collection_name = std::env::var("COLLECTION_NAME").expect("needs COLLECTION_NAME set");
     let qdrant_uri = std::env::var("QDRANT_URI").expect("need QDRANT_URI set");
     let mut config = QdrantClientConfig::from_url(&qdrant_uri);
@@ -73,32 +68,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             panic!("text isn't a string")
         };
 
-        let OpenaiResponse {
-            data: OpenaiData { embedding },
-        } = client
-            .post("https://api.openai.com/v1/embedding")
-            .header("Authorization", &format!("Bearer {openai_api_key}"))
+        let CohereResponse { outputs } = client
+            .post("https://api.cohere.ai/embed")
+            .header("Authorization", &format!("Bearer {cohere_api_key}"))
             .header("Content-Type", "application/json")
-            .body(format!(
-                "{{\"input\":\"{text}\",\"model\":\"text-embedding-ada-002\"}}"
-            ))
+            .header("Cohere-Version", "2021-11-08")
+            .body(format!("{{\"text\":[\"{text}\"],\"model\":\"small\"}}"))
             .send()
             .await?
             .json()
             .await?;
-        points.push(PointStruct {
-            id: Some(PointId::from(std::mem::replace(i, *i + 1) as u64)),
-            payload: payload.clone(),
-            vectors: Some(Vectors::from(embedding)),
-        });
-        write!(stdout, ".")?;
-        if *i % 100 == 0 {
-            write!(stdout, "{}", i)?;
-            qdrant_client
-                .upsert_points(&collection_name, std::mem::take(&mut points), None)
-                .await?;
+        for embedding in outputs {
+            points.push(PointStruct {
+                id: Some(PointId::from(std::mem::replace(i, *i + 1) as u64)),
+                payload: payload.clone(),
+                vectors: Some(Vectors::from(embedding)),
+            });
+            write!(stdout, ".")?;
+            if *i % 100 == 0 {
+                write!(stdout, "{}", i)?;
+                qdrant_client
+                    .upsert_points(&collection_name, std::mem::take(&mut points), None)
+                    .await?;
+            }
+            stdout.flush()?;
         }
-        stdout.flush()?;
     }
     qdrant_client
         .upsert_points(&collection_name, points, None)

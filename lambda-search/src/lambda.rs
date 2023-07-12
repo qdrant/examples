@@ -14,19 +14,14 @@ fn error_response(code: u16, message: &str) -> Response<Body> {
 }
 
 #[derive(Deserialize)]
-struct OpenaiResponse {
-    data: OpenaiData,
-}
-
-#[derive(Deserialize)]
-struct OpenaiData {
-    embedding: Vec<f32>,
+struct CohereResponse {
+    outputs: Vec<Vec<f32>>
 }
 
 async fn function_handler(
     event: Request,
     client: &Client,
-    openai_api_key: &str,
+    cohere_api_key: &str,
     qdrant_client: &QdrantClient,
     collection_name: &str,
 ) -> Result<Response<Body>, Error> {
@@ -36,15 +31,12 @@ async fn function_handler(
     let Some(query) = params.first("q") else {
         return Ok(error_response(400, "Missing query string parameter `q`"));
     };
-    let OpenaiResponse {
-        data: OpenaiData { embedding },
-    } = client
-        .post("https://api.openai.com/v1/embedding")
-        .header("Authorization", &format!("Bearer {openai_api_key}"))
+    let CohereResponse { outputs } = client
+.post("https://api.cohere.ai/embed")
+        .header("Authorization", &format!("Bearer {cohere_api_key}"))
         .header("Content-Type", "application/json")
-        .body(format!(
-            "{{\"input\":\"{query}\",\"model\":\"text-embedding-ada-002\"}}"
-        ))
+        .header("Cohere-Version", "2021-11-08")
+        .body(format!("{{\"text\":[\"{query}\"],\"model\":\"small\"}}"))
         .send()
         .await?
         .json()
@@ -53,7 +45,7 @@ async fn function_handler(
     let response_body: String = qdrant_client
         .search_points(&SearchPoints {
             collection_name: collection_name.to_string(),
-            vector: embedding,
+            vector: outputs.into_iter().next().ok_or("Empty output from embedding")?,
             limit: SEARCH_LIMIT as u64,
             with_payload: Some(true.into()),
             ..Default::default()
@@ -83,7 +75,7 @@ async fn main() -> Result<(), Error> {
     env_logger::init();
 
     let client = Client::builder().build().unwrap();
-    let openai_api_key = std::env::var("OPENAI_API_KEY").expect("need OPENAI_API_KEY set");
+    let cohere_api_key = std::env::var("COHERE_API_KEY").expect("need COHERE_API_KEY set");
     let collection_name = std::env::var("COLLECTION_NAME").expect("need COLLECTION_NAME set");
     let qdrant_uri = std::env::var("QDRANT_URI").expect("need QDRANT_URI set");
     let mut config = QdrantClientConfig::from_url(&qdrant_uri);
@@ -100,7 +92,7 @@ async fn main() -> Result<(), Error> {
         function_handler(
             req,
             &client,
-            &openai_api_key,
+            &cohere_api_key,
             &qdrant_client,
             &collection_name,
         )
