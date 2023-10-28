@@ -40,7 +40,7 @@ docker run -p 6333:6333 \
 
 You should see something like this:
 
-![dockerqdrant](../images/docker_qdrant.png)
+![dockerqdrant](../images/docker_qdrant_28_10_2023.png)
 
 If you experience any issues during installation, please let us know in our [Discord channel here](https://qdrant.to/discord). 
 
