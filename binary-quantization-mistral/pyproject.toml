@@ -12,6 +12,10 @@ datasets = "^2.16.1"
 tqdm = "^4.66.1"
 seaborn = "^0.13.1"
 qdrant-client = "^1.7.0"
+mistralai = "^0.0.9"
+python-dotenv = "^1.0.0"
+ruff = "^0.1.13"
+loguru = "^0.7.2"
 
 [build-system]
 requires = ["poetry-core"]
