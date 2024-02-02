@@ -2,7 +2,7 @@
 
 This repo contains a collection of tutorials, demos, and how-to guides on how to use Qdrant and adjacent technologies.
 
-| Example                                                                                     Description                                                                                | Technologies                                                                 |
+| Example                                                                                   |  Description                                                                                | Technologies                                                                 |
 |-------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
 | [Huggingface Spaces with Qdrant](./hf-spaces-with-qdrant)                                 | Host a public demo quickly for your similarity app with HF Spaces and Qdrant Cloud         | HF Spaces, CLIP, semantic image search                                       |
 | [QA which is always updated: Recency and Cohere using Llama Index](./llama_index_recency) | Notebook which demonstrates how you can keep your QA system always use updated information | Llama Index, OpenAI Embeddings, Cohere Reranker                              |
