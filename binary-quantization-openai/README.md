@@ -20,7 +20,8 @@ To install the necessary dependencies, follow these steps:
 
 1. Clone the repository: `git clone https://github.com/qdrant/examples.git`
 2. Navigate to the project directory: `cd binary-quantization-openai`
-3. Install the required packages: `poetry install`
+3. Install [Poetry](https://python-poetry.org/): `pip install poetry`
+3. Install the required packages: `poetry install --no-root`
 
 ## Usage
 
