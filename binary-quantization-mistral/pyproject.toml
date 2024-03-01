@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "binary-quantization-mistral"
+version = "0.0.1"
+description = "Experiments with Mistral Embedding for Binary Quantization"
+authors = ["Nirant Kasliwal <nirant.bits@gmail.com>"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+datasets = "^2.16.1"
+tqdm = "^4.66.1"
+seaborn = "^0.13.1"
+qdrant-client = "^1.7.0"
+mistralai = "^0.0.9"
+python-dotenv = "^1.0.0"
+ruff = "^0.1.13"
+loguru = "^0.7.2"
+pandas = "^2.2.1"
+tabulate = "^0.9.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
