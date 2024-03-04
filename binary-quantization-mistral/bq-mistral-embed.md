@@ -15,7 +15,7 @@ In this study, we will:
 - discuss the implications of these findings for real-world applications
 
 By the end of this blog, you should be familiar with best practices for leveraging Binary Quantization to enhance your embeddings.
-You can also try out these techniques as described in our [Jupyter notebook](https://github.com/qdrant/examples/blob/master/binary-quantization-mistral/Mistral-Embed.ipynb).
+You can also try out these techniques as described in our corresponding [Jupyter notebook](https://github.com/qdrant/examples/blob/master/binary-quantization-mistral/Mistral-Embed.ipynb).
 
 ## Setting up the Environment
 
