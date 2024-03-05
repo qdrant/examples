@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "binary-quantization-openai"
+version = "0.1.0"
+description = "Binary Quantization with the OpenAI Text Embedding 003"
+authors = ["Nirant Kasliwal <nirant.bits@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">3.9, <3.12"
+openai = "^1.10.0"
+qdrant-client = "^1.7.1"
+jupyter = "^1.0.0"
+datasets = "^2.16.1"
+python-dotenv = "^1.0.1"
+tqdm = "^4.66.1"
+loguru = "^0.7.2"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.1.14"
+isort = "5.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
