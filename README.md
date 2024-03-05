@@ -2,7 +2,7 @@
 
 This repo contains a collection of tutorials, demos, and how-to guides on how to use Qdrant and adjacent technologies.
 
-| Example                                                                                   |  Description                                                                                | Technologies                                                                 |
+| Example                                                                                   | Description                                                                                | Technologies                                                                 |
 |-------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
 | [Huggingface Spaces with Qdrant](./hf-spaces-with-qdrant)                                 | Host a public demo quickly for your similarity app with HF Spaces and Qdrant Cloud         | HF Spaces, CLIP, semantic image search                                       |
 | [QA which is always updated: Recency and Cohere using Llama Index](./llama_index_recency) | Notebook which demonstrates how you can keep your QA system always use updated information | Llama Index, OpenAI Embeddings, Cohere Reranker                              |
@@ -14,3 +14,5 @@ This repo contains a collection of tutorials, demos, and how-to guides on how to
 | [Basic RAG](./rag-openai-qdrant)                                                          | Basic RAG pipeline with Qdrant and OpenAI SDKs                                             | OpenAI, Qdrant, FastEmbed                                                    |
 | [Step-back prompting in Langchain RAG](./langchain-qdrant-step-back-prompting)            | Step-back prompting for RAG, implemented in Langchain                                      | OpenAI, Qdrant, Cohere, Langchain                                            |
 | [Collaborative Filtering and MovieLens](./sparse-vectors-movies-reco)                     | A notebook demonstrating how to build a collaborative filtering system using Qdrant        | Sparse Vectors, Qdrant                                                       |
+| [Use semantic search to navigate your codebase](./code-search/)                           | Implement semantic search application for code search task                                 | Qdrant, Python, sentence-transformers, Jina                                  |
+
