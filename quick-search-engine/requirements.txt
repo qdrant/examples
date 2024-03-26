@@ -1,3 +1,2 @@
-numpy
-pandas
-qdrant-client[fastembed]
+datasets==2.18.0
+qdrant-client[fastembed]==1.8.0
