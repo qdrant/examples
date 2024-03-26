@@ -1,116 +1,34 @@
-# Qdrant Search Engine
+# Overview
 
-This code contains code and instructions for building a search engine using Qdrant. Qdrant is particularly well-suited for tasks involving similarity search, such as recommendation systems, image or text retrieval, and clustering.
+### Quora Question Pairs
 
-## Article Overview
+It is a large corpus of different questions and is used to detect similar/repeating questions by understanding the semantic meaning of them
 
-The associated Medium article titled ["Build a search engine in 5 minutes using Qdrant"](https://medium.com/@armaghanshakir/build-a-search-engine-in-5-minutes-using-qdrant-5c7a3ef6ac5) provides a step-by-step guide on building a search engine using Qdrant.
+### Qdrant
 
-## Instructions
+Qdrant is an Open-Source Vector Database and Vector Search Engine written in Rust. It provides fast and scalable vector similarity search service.
 
-### Setting Up
+### Abstract
 
-1. Join the [Quora Question Pairs Competition on Kaggle](https://www.kaggle.com/c/quora-question-pairs).
-2. Download the file `train.csv.zip`.
-3. Unzip the downloaded file.
-4. Save the path to the dataset in the `DATA_PATH` variable.
+This notebook implements a search engine using the `Quora Duplicate Questions` dataset and the `Qdrant library`. It aims to identify similar questions based on user input queries.
 
-```python
-DATA_PATH = "/kaggle/working/train.csv" # path to your train.csv file
-```
+### Methodology
 
-### Initializing Constants
+Here's a detailed overview of implementation:
 
-```python
-# Name of Qdrant Collection for saving vectors
-QD_COLLECTION_NAME = "collection_name"
+- Load the Quora Dataset and apply preprocessing steps.
+- Vectorize the textual data and store in a vector space, where questions entered by users can be vectorized and compared in the same vector space - All these steps are covered by internal functionality of Qdrant.
+- Several example queries are provided to demonstrate the functionality of the search engine.
 
-# Sample size since the complete dataset is very long and can take long processing time
-N = 30_000
-```
+### Summary
 
-### Loading Dataset
+In summary, the notebook demonstrates how easily and efficiently, complete search engine can be created using Qdrant Vector Database and Client.
 
-Load the dataset using pandas in Python:
+### Explore More!
 
-```python
-import pandas as pd
-
-df = pd.read_csv(DATA_PATH)
-
-print("Shape of DataFrame:", df.shape)
-print("First 10 rows:")
-df.head(10)
-```
-
-### Extracting Questions
-
-Extract questions from the dataframe, remove duplicates, and create a sample to see results on a part of the data:
-
-```python
-# extract the questions from df
-questions = pd.concat([df['question1'], df['question2']], axis=0)
-
-# remove all the duplicate questions
-questions = questions.drop_duplicates()
-
-# print total number of questions
-print("Total Questions:", len(questions))
-
-# sample questions from complete data to avoid long processing
-questions = questions.sample(N)
-
-# print first 10 questions
-print("First 10 Questions:")
-questions.iloc[:10]
-```
-
-### Installing Qdrant and Adding Documents
-
-First, install qdrant with fastembed:
-
-```bash
-!pip install qdrant-client[fastembed]
-```
-
-Then add the documents to the Qdrant vector space:
-
-```python
-from qdrant_client import QdrantClient
-
-client = QdrantClient(":memory:")
-
-client.add(
-    collection_name=QD_COLLECTION_NAME,
-    documents=questions,
-)
-
-print("Completed")
-```
-
-### Creating a Search Function
-
-Create a search function that processes the query and prints the results:
-
-```python
-def search(query):
-    results = client.query(
-        collection_name=QD_COLLECTION_NAME,
-        query_text=query,
-        limit=5
-    )
-    print("Query:", query)
-    for i, result in enumerate(results):
-        print()
-        print(f"{i+1}) {result.document}")
-
-search("what is the best early morning meal?")
-search("How should one introduce themselves?")
-search("Why is the Earth a sphere?")
-```
-
-## Additional Resources
-
-- [E-Commerce Products Search Engine Using Qdrant](https://medium.com/@armaghanshakir/e-commerce-products-search-engine-using-qdrant-b65dc6ab1983)
-- [Qdrant Documentation](https://qdrant.github.io/)
-- [Qdrant Python Client Documentation](https://qdrant-client.readthedocs.io/en/latest/)
+- This notebook has been covered in an article on Medium: [Build a search engine in 5 minutes using Qdrant](https://medium.com/@raoarmaghanshakir040/build-a-search-engine-in-5-minutes-using-qdrant-f43df4fbe8d1)
+- [E-Commerce Products Search Engine Using Qdrant](https://www.kaggle.com/code/sacrum/e-commerce-products-search-engine-using-qdrant)
+- [Qdrant](https://qdrant.tech)
+- [Qdrant Documentation](https://qdrant.tech/documentation/)
+- [Qdrant Python Client Documentation](https://python-client.qdrant.tech)
+- [Quora Question Pair](https://www.kaggle.com/competitions/quora-question-pairs)
