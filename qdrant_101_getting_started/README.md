@@ -434,13 +434,13 @@ If you want to retrieve this info, use the `client.retrieve()` method.
 
 
 ```python
-resutls = client.retrieve(
+results = client.retrieve(
     collection_name=my_collection,
     ids=[10, 50, 100, 500],
     with_vectors=False
 )
 
-type(resutls), resutls
+type(results), results
 ```
 
 
@@ -458,7 +458,7 @@ The response is a list with records and each element inside a record can be acce
 
 
 ```python
-resutls[0].payload
+results[0].payload
 ```
 
 
@@ -474,7 +474,7 @@ resutls[0].payload
 
 
 ```python
-resutls[0].id
+results[0].id
 ```
 
 
