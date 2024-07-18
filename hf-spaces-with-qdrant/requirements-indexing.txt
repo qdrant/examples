@@ -1,5 +1,0 @@
-torch
-tqdm
-qdrant-client
-fire
-pandas
