@@ -1,6 +1,7 @@
+# Beyond the Tutorial: Building Agents with LlamaIndex & Qdrant
+
 ![Semantic Caching Workflow](https://qdrant.tech/blog/hybrid-cloud-llamaindex/preview/title.jpg)
 
-Beyond the Tutorial: Building Agents with LlamaIndex & Qdrant
 
 Are you ready to move beyond the basics and build advanced agents that can manage complex, real-world queries?
 
