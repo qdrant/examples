@@ -1,11 +1,30 @@
-Now that we've gotten our data, stored it in a vector database and built a RAG app, we need to evaluate the performance of the different retrieval methods.
+# Qdrant Zoom: Building and Evaluating Retrieval Methods
 
-We'll use a simple evaluation metric, the percentage of correct results.
+This directory contains a Jupyter notebook that demonstrates how to build and evaluate different retrieval methods for the Qdrant Zoom RAG application.
 
-We'll evaluate the performance of the different retrieval methods by searching for a random meeting and checking if the retrieved results contain the correct meeting.
+## Contents
 
-We'll do this for 30 random meetings and report the percentage of correct results.
+This notebook covers the following key aspects:
 
-Then we will explore the results and use the best retrieval method for our application in deployment.
+1. Evaluation of retrieval methods using Qdrant and stored Zoom meeting data
+2. Comparison of different retrieval approaches (dense, sparse, and hybrid)
+3. Performance analysis using a simple metric: percentage of correct results
+4. Exploration of results to determine the best retrieval method for deployment
 
+## Key Features
 
+- Implements multiple retrieval methods using Qdrant
+- Evaluates performance by searching for random meetings
+- Uses a sample size of 30 random meetings for comprehensive testing
+- Reports the percentage of correct results for each method
+- Provides insights for selecting the optimal retrieval approach for deployment
+
+## Getting Started
+
+1. Ensure you have completed the data retrieval and storage steps from the previous part
+2. Open the Jupyter notebook in this directory
+3. Follow the step-by-step instructions to evaluate retrieval methods
+
+## Next Steps
+
+After completing the evaluation process, use the insights gained to implement the best-performing retrieval method in the deployment phase of the project.

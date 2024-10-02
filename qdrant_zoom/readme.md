@@ -1,40 +1,68 @@
+# Qdrant Zoom RAG Application
+You can view the deployed application here: https://zoom-qdrant.vercel.app/
 
-This repo is a simple example of how to use Qdrant to build a RAG app, from getting your data from Zoom to building a search app and deploying it on the internet.
+This repository demonstrates how to build a Retrieval-Augmented Generation (RAG) application using Qdrant, focusing on Zoom meeting data. The project is divided into three main parts:
 
-In this repo you can find code for getting your from Zoom and storing it in a Qdrant collection.
+1. Data Retrieval, Storage and Vector Search with Qdrant and Zoom
+2. Building and Evaluating RAG application Retrieval Methods with Qdrant and Relari
+3. Deploying the Application to the internet with Qdrant and Nextjs
 
-In this repo we will build a website so that search thought your zoom meetings.
+## Part 1: Data Retrieval and Storage
 
-You'll learn how to get data from an API, how to store it in a vector database and how to search through it using Qdrant.
+In this section, we use a Node.js application to:
+- Fetch data from the Zoom API
+- Process and store the data in a Qdrant collection
+- Implement basic query functionality
 
-Here is the final site if you want to check it out: https://zoom-qdrant.vercel.app/
+Key technologies:
+- Qdrant for vector storage and search
+- Zoom API
+- Node.js
 
-If you want to build the site with your own Zoom data, change the values in the `.env.local` file.
+## Part 2: Building and Evaluating Retrieval Methods
 
-In the first repo you'll be working in a full stack project, but mosty with python.
+This part uses a Jupyter notebook to:
+- Implement and compare different retrieval methods (dense, sparse, and hybrid)
+- Evaluate the performance of each method
+- Fine-tune prompts for optimal results
 
-In the seond repo you'll be working in a jupyter notebook on Collab or locall. 
+Key technologies:
+- Qdrant
+- Relari
+- Langchain
+- Instructor
 
-In the third repo you'll be working with typescript and Next js to deploy your application.
+## Part 3: Deploying the Search Application
 
-## Setting up the environment
+The final part involves building and deploying a web application to search through Zoom meeting data:
+- Develop a user friendlyinterface using Next.js
+- Integrate the Qdrant backend for search functionality
+- Deploy the application online
 
-1. Clone the repo
-2. Run `npm install`
-3. Run `npm run dev`
+Key technologies:
+- Qdrant
+- TypeScript
+- Next.js
+- Vercel for deployment
 
-It uses the following libraries:
-- `qdrant-client` for interacting with Qdrant
-- `python-zoomus` for interacting with Zoom's API
+## Getting Started
 
-First we get our zoom data
+1. Clone the repository
+2. Navigate to each part's directory and follow the specific README instructions
 
-then we store it in a Qdrant collection.
+## Final Application
 
-then we build a simple rag app with dense, sparse and hybrid retrieval
+You can view the deployed application here: https://zoom-qdrant.vercel.app/
 
-then we evaluate the performance of the different retrieval methods
+To use your own Zoom data, update the values in the `.env.local` file.
 
-Then we tune our prompt.
+## Project Structure
 
-Then we build a site and deploy with Next js.
+- `qdrant_zoom/get_and_store_data/`: Node.js app for data retrieval and storage
+- `qdrant_zoom/building_and_evaluating/`: Jupyter notebook for method evaluation
+- `qdrant_zoom/deploying/`: Next.js app for the search interface
+
+Each directory contains its own README with specific instructions and details.
+
+
+This project showcases the entire process of building a RAG application, from data acquisition to deployment, using Qdrant as the vector database.
