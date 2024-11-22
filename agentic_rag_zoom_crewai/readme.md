@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project demonstrates how to build a Vector Search Powered Agentic workflow to extract insights from meeting recordings. By combining Qdrant's vector search capabilities with CrewAI agents, users can search through and analyze their own meeting content. 
+This project demonstrates how to build a Vector Search powered Agentic workflow to extract insights from meeting recordings. By combining Qdrant's vector search capabilities with CrewAI agents, users can search through and analyze their own meeting content. 
 
 The application first converts the meeting transcript into vector embeddings and stores them in a Qdrant vector database. It then uses CrewAI agents to query the vector database and extract insights from the meeting content. Finally, it uses Anthropic Claude to generate natural language responses to user queries based on the extracted insights from the vector database.
 
