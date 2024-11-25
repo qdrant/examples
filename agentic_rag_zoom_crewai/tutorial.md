@@ -5,6 +5,7 @@ By combining the power of Qdrant for vector search and CrewAI for orchestrating 
 In this tutorial, we'll walk you through building an Agentic RAG system step by step. By the end, you'll have a working framework for storing data in a Qdrant Vector Database and extracting insights using CrewAI agents in conjunction with Vector Search over your data.
 
 ## Why Agentic RAG?
+
 Traditional RAG systems focus on fetching data and generating responses, but they lack the ability to reason deeply or handle multi-step processes. Agentic RAG solves this by combining:
 
 - RAG's power to retrieve relevant data using vector search
@@ -13,6 +14,7 @@ Traditional RAG systems focus on fetching data and generating responses, but the
 Think of it like upgrading from a librarian who retrieves books to a research assistant who not only finds the books but also summarizes and interprets them for you.
 
 ## What You'll Build
+
 In this hands-on tutorial, we'll create a system that:
 
 1. Uses Qdrant to store and retrieve meeting transcripts as vector embeddings
@@ -25,7 +27,7 @@ In this hands-on tutorial, we'll create a system that:
 
 1. **Get API Credentials for Qdrant**:
    - Sign up for an account at [Qdrant Cloud](https://cloud.qdrant.io/).
-   - Create a new cluster and copy the **Cluster URL** (format: https://xxx.gcp.cloud.qdrant.io).
+   - Create a new cluster and copy the **Cluster URL** (format: <https://xxx.gcp.cloud.qdrant.io>).
    - Go to **Data Access Control** and generate an **API key**.
 
 2. **Get API Credentials for AI Services**:
@@ -37,48 +39,57 @@ In this hands-on tutorial, we'll create a system that:
 ## **Setup**
 
 1. **Clone the Repository**:
-   ```bash
-   git clone <repository-url>
-   cd qdrant-agentic-rag
-   ```
+
+```bash
+git clone https://github.com/qdrant/examples
+cd examples/agentic_rag_zoom_crewai/
+```
 
 2. **Create and Activate a Python Virtual Environment**:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # Windows: venv\Scripts\activate
-   ```
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+```
 
 3. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+
+```bash
+pip install -r requirements.txt
+```
 
 4. **Configure Environment Variables**:
-   Create a `.env.local` file with:
-   ```bash
-   openai_api_key=your_openai_key_here
-   anthropic_api_key=your_anthropic_key_here
-   qdrantUrl=your_qdrant_url_here
-   qdrantApiKey=your_qdrant_api_key_here
-   ```
+
+Create a `.env.local` file with:
+
+```text
+OPENAI_API_KEY=your_openai_key_here
+ANTHROPIC_API_KEY=your_anthropic_key_here
+QDRANT_URL=your_qdrant_url_here
+QDRANT_API_KEY=your_qdrant_api_key_here
+```
 
 ---
 
 ## **Usage**
 
 ### **1. Process Meeting Data**
+
 The `data_loader.py` script processes meeting data and stores it in Qdrant:
+
 ```bash
 python vector/data_loader.py
 ```
 
 ### **2. Launch the Interface**
+
 Start the interactive app:
+
 ```bash
 streamlit run vector/streamlit_app.py
 ```
----
 
+---
 
 ### **Technical Details**
 
@@ -114,8 +125,8 @@ class MeetingData:
         self.meetings = self._load_meetings()
         
         self.qdrant_client = QdrantClient(
-            url=os.getenv('qdrantUrl'),
-            api_key=os.getenv('qdrantApiKey')
+            url=os.getenv('QDRANT_URL'),
+            api_key=os.getenv('QDRANT_API_KEY')
         )
         self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
 ```
@@ -302,6 +313,7 @@ with st.sidebar:
 This combination of features creates an interface that's both powerful and approachable. Users can see their query being processed in real-time, adjust settings to their needs, and maintain context through the chat history.
 
 ---
+
 ## **Conclusion**
 
 This tutorial has demonstrated how to build a sophisticated meeting analysis system that combines vector search with AI agents. Let's recap the key components we've covered:
@@ -322,12 +334,14 @@ This tutorial has demonstrated how to build a sophisticated meeting analysis sys
    - Configurable search and analysis settings
 
 The resulting system demonstrates the power of combining vector search with AI agents to create an intelligent meeting assistant. By following this tutorial, you've learned how to:
+
 - Process and store meeting data efficiently
 - Implement semantic search capabilities
 - Create specialized AI agents for analysis
 - Build an intuitive user interface
 
 This foundation can be extended in many ways, such as:
+
 - Adding more specialized agents
 - Implementing additional analysis tools
 - Enhancing the user interface
