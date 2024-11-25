@@ -17,13 +17,12 @@ env_path = Path(__file__).parent.parent / '.env.local'
 load_dotenv(env_path)
 
 # Set API keys from environment
-os.environ['OPENAI_API_KEY'] = os.getenv('openai_api_key')
-ANTHROPIC_API_KEY = os.getenv('anthropic_api_key')
+ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
 
 # Initialize clients
 qdrant_client = QdrantClient(
-    url=os.getenv('qdrantUrl'),
-    api_key=os.getenv('qdrantApiKey')
+    url=os.getenv('QDRANT_URL'),
+    api_key=os.getenv('QDRANT_API_KEY')
 )
 openai_client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
 embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
