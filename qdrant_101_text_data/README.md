@@ -40,7 +40,7 @@ Throughout this tutorial, we will delve deeper into the fundamentals of NLP and 
 
 ## 3. Prerequisites
 
-To get started, use the latest Qdrant Docker image: `docker pull qdrant/qdrant`. 
+To get started, use the latest Qdrant Docker image: `docker pull qdrant/qdrant`.
 
 Next, initialize Qdrant with:
 
@@ -77,7 +77,7 @@ Transformers are essential to this tutorial. Your initial task is to 1) load sam
 
 ### 4.1 Initial setup
 
-In this tutorial, you will create a newspaper article recommendation system. When the user chooses an article, the system will suggest other articles that are similar. 
+In this tutorial, you will create a newspaper article recommendation system. When the user chooses an article, the system will suggest other articles that are similar.
 
 You will use the **AG News** [sample data set from HuggingFace](https://huggingface.co/datasets/ag_news):
 
@@ -111,7 +111,7 @@ dataset
 
 ### 4.3 Examine the dataset
 
-Now that we have loaded the dataset, let's look at some sample articles: 
+Now that we have loaded the dataset, let's look at some sample articles:
 
 
 ```python
@@ -128,26 +128,26 @@ for i in range(5):
     Sample 1
     ======================================================================
     Microsoft issues SP2 patch com September 22, 2004, 12:09 PM PT. OS Migration has moved to the bottom ranks after making its mark on IT Professional #39;s top five priority last year.
-    
+
     Sample 2
     ======================================================================
     Stocks Post Early Gains As Oil Is Steady Stocks are posting some early gains this morning. The Dow Jones Industrial Average is up 10 points in today #39;s early going. Advancing issues on the New York Stock Exchange hold a 4-3 lead over decliners.
-    
+
     Sample 3
     ======================================================================
     U.S. Report Turns Focus to Greenhouse Gases Previously, the Bush administration stressed uncertainties in understanding the causes and consequences of global warming.
-    
+
     Sample 4
     ======================================================================
     U.S., Afghan Soldiers Arrest 10 Suspects (AP) AP - U.S. and Afghan soldiers conducting a sweep in southern Zabul province arrested 10 suspected Taliban after a firefight in a forbidding mountain area, the governor said Saturday.
-    
+
     Sample 5
     ======================================================================
     Intel expands Centrino family Based on Intel #39;s mobile architecture, the new Intel Pentium M processor 765 processor features 2MB of integrated, power-managed Level 2 cache and a frequency of 2.10 GHz.
-    
 
 
-You can switch to a pandas dataframe by using the method `.to_pandas()`. This can come in handy when you want to manipulate and plot the data. 
+
+You can switch to a pandas dataframe by using the method `.to_pandas()`. This can come in handy when you want to manipulate and plot the data.
 
 Here you will extract the class names of news articles and plot the frequency with which they appear:
 
@@ -169,16 +169,16 @@ id2label = {str(i): label for i, label in enumerate(dataset.features["label"].na
 ```
 
 
-    
+
 ![png](qdrant_and_text_data_files/qdrant_and_text_data_25_0.png)
-    
 
 
-As you can see, the dataset is well balanced. 
 
-What if you want to know the average length of text per each class label? 
+As you can see, the dataset is well balanced.
 
-Write a function for this and map to all of the elements in the dataset. 
+What if you want to know the average length of text per each class label?
+
+Write a function for this and map to all of the elements in the dataset.
 `'length_of_text'` will be the new column in the dataset.
 
 
@@ -207,14 +207,14 @@ dataset[:10]['length_of_text']
 ```
 
 
-    
+
 ![png](qdrant_and_text_data_files/qdrant_and_text_data_28_0.png)
-    
 
 
-The length of characters in the news articles seem to be quite similar for all the labels, and that's okay as very large documents might need to be broken apart before we get to feed them to our model. 
 
-### Tokenize and embed data using GPT-2 
+The length of characters in the news articles seem to be quite similar for all the labels, and that's okay as very large documents might need to be broken apart before we get to feed them to our model.
+
+### Tokenize and embed data using GPT-2
 
 Your next step is to use a pre-trained model to tokenize the data and create an embedding layer based on it.
 
@@ -224,7 +224,7 @@ The model you will use to tokenize our news articles and extract the embeddings 
 
 The example below takes inspiration from an example available on Chapter 9 of [Natural Language Processing with Transformers](https://transformersbook.com/) by Lewis Tunstall, Leandro von Werra, and Thomas Wolf. If you would like to use a different model to follow along, you can find all of the models available at [Hugging Face's model hub](https://huggingface.co/models)
 
-In order to tokenize your dataset, use two classes from the `transformers` library, AutoTokenizer and AutoModel. These will make use of the version of GPT-2 provided. 
+In order to tokenize your dataset, use two classes from the `transformers` library, AutoTokenizer and AutoModel. These will make use of the version of GPT-2 provided.
 
 
 ```python
@@ -370,7 +370,7 @@ embs.last_hidden_state.size(), embs[0]
 
 
 
-Notice that you got a tensor of shape `[batch_size, inputs, dimensions]`. The inputs are your tokens and these dimensions are the embedding representation that you want for your sentence rather than each token. So what can you do to get one rather than 15? The answer is **mean pooling**. 
+Notice that you got a tensor of shape `[batch_size, inputs, dimensions]`. The inputs are your tokens and these dimensions are the embedding representation that you want for your sentence rather than each token. So what can you do to get one rather than 15? The answer is **mean pooling**.
 
 You are going to take the average of all 15 vectors while paying attention to the most important parts of it. The details of how this is happening are outside of the scope of this tutorial, but please refer to the Natural Language Processing with Transformers book mentioned earlier for a richer discussion on the concepts touched on in this section (including the borrowed functions we are about to use).
 
@@ -508,7 +508,7 @@ dim_size
 
 ## 5. Semantic Search with Qdrant
 
-The two modules we'll use the most are the `QdrantClient` and the `models` one. The former allows us to connect to our container running Qdrant, and the latter will give us the rest of the utilities we'll need to manage our collections. 
+The two modules we'll use the most are the `QdrantClient` and the `models` one. The former allows us to connect to our container running Qdrant, and the latter will give us the rest of the utilities we'll need to manage our collections.
 
 As a quick reminder, [collections](https://qdrant.tech/documentation/collections/) are named sets of points among which you can search; [points](https://qdrant.tech/documentation/points/) consist of a vector, an optional id and an optional payload; an id a unique identifier for your vectors, and a [payload](https://qdrant.tech/documentation/payload/) is a JSON object with additional data you can add to your points. Each collection needs a distance metric such as Euclidean Distance, Dot Product, or Cosine Similarity.
 
@@ -594,7 +594,7 @@ Verify that the collection has been created by scrolling through the points with
 
 ```python
 client.scroll(
-    collection_name=my_collection, 
+    collection_name=my_collection,
     limit=10,
     with_payload=False, # change to True to see the payload
     with_vectors=False  # change to True to see the vectors
@@ -814,7 +814,7 @@ def get_st_embedding(example):
 small_set = small_set.map(get_st_embedding)
 ```
 
-                                                                   
+
 
 
 ```python
@@ -886,10 +886,10 @@ some_txt
 
 
 
-It seems to be talking about IBM and its servers. What we'll do with this is to use the id of this 
+It seems to be talking about IBM and its servers. What we'll do with this is to use the id of this
 article to tell Qdrant that we want to see more like it.
 
-They key thing about the recommendation API of Qdrant is that we need at least 1 id for an article 
+They key thing about the recommendation API of Qdrant is that we need at least 1 id for an article
 that a user liked, or gave us a 👍 for, but the number of negative articles is optional.
 
 
@@ -930,7 +930,7 @@ client.recommend(
 
 Not surprisingly, we get a lot of tech news with decent degrees of similarity.
 
-Let's look at what happens when we tell Qdrant that we want to see news related to the Manchester United 
+Let's look at what happens when we tell Qdrant that we want to see news related to the Manchester United
 football team, that we like news about workers' rights, and that we dislike anything related to raising interests rates.
 
 
@@ -1005,8 +1005,8 @@ client.recommend(
 
 
 
-The results seem palatable given the search criteria. Let's see what we get without the 
-article we liked about Google search. Also, this time we want to see only articles that 
+The results seem palatable given the search criteria. Let's see what we get without the
+article we liked about Google search. Also, this time we want to see only articles that
 pass a certain similarity threshold to make sure we only get very relevant results back.
 
 

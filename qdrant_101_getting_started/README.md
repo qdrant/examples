@@ -16,7 +16,7 @@ Vector databases shine in many applications like [semantic search](https://en.wi
 
 ## 1. Learning outcomes
 
-By the end of this tutorial, you will be able to: 
+By the end of this tutorial, you will be able to:
 - Create, update, and query collections of vectors using Qdrant.
 - Conduct semantic search based on new data.
 - Develop an intuition for the mechanics behind the recommendation API of Qdrant.
@@ -42,7 +42,7 @@ You should see something like this:
 
 ![dockerqdrant](../images/docker_qdrant_28_10_2023.png)
 
-If you experience any issues during installation, please let us know in our [Discord channel here](https://qdrant.to/discord). 
+If you experience any issues during installation, please let us know in our [Discord channel here](https://qdrant.to/discord).
 
 Now that you have Qdrant up and running, you need to pick a client to connect to it. We'll be using Python as it has the most mature data tools ecosystem out there. Let's start setting up our development environment and getting the libraries we'll be using.
 
@@ -65,7 +65,7 @@ After your have your environment ready, let's begin using Qdrant.
 
 ## 3. Getting started
 
-The two modules we are going to use are `QdrantClient` and `models`. The former lets you connect to Qdrant or to run an in-memory database by switching the parameter `location=` to `":memory:"`. The latter gives you access to most functionalities you need to interact with Qdrant. 
+The two modules we are going to use are `QdrantClient` and `models`. The former lets you connect to Qdrant or to run an in-memory database by switching the parameter `location=` to `":memory:"`. The latter gives you access to most functionalities you need to interact with Qdrant.
 
 
 ```python
@@ -151,9 +151,9 @@ assert collection_info.vectors_count == 0
 
 Two important takeaways:
 
-1. When you initiated the Docker image, you created a local directory called, `qdrant_storage`. This is where all of your collections and their metadata will be stored. 
+1. When you initiated the Docker image, you created a local directory called, `qdrant_storage`. This is where all of your collections and their metadata will be stored.
 
-    Qdrant can use one of two options for [storage](https://qdrant.tech/documentation/concepts/storage/): 
+    Qdrant can use one of two options for [storage](https://qdrant.tech/documentation/concepts/storage/):
     - **in-memory** storage, which stores all vectors in RAM and has the highest speed since disk access is required only for persistence)
     - **memmap** storage, which creates a virtual address space associated with the file on disk. You can have a look at that directory in a *nix system with `tree qdrant_storage -L 2`, and something similar to the following output should come up for you.
 
@@ -165,8 +165,8 @@ Two important takeaways:
         │   └── my_first_collection
         └── raft_state
         ```
-    
-2. You used `client.recreate_collection()`, which can be used more than once to create new collections with or without the same name. Therefore, please make sure you do not run this command multiple times and accidentally recreate a collection. 
+
+2. You used `client.recreate_collection()`, which can be used more than once to create new collections with or without the same name. Therefore, please make sure you do not run this command multiple times and accidentally recreate a collection.
 
 Instead, to create a brand new collection that cannot be recreated, use the `client.create_collection()` method.
 
@@ -297,7 +297,7 @@ We can also delete a point in a straightforward fashion.
 ```python
 # this will show the amount of vectors BEFORE deleting the one we just created
 client.count(
-    collection_name=my_collection, 
+    collection_name=my_collection,
     exact=True,
 )
 ```
@@ -330,7 +330,7 @@ client.delete(
 ```python
 # this will show the amount of vectors AFTER deleting them
 client.count(
-    collection_name=my_collection, 
+    collection_name=my_collection,
     exact=True,
 )
 ```
@@ -409,7 +409,7 @@ payload[:3]
 
 
 
-You can upsert your Points (ids, data, and payload), with the same `client.upsert()` method you used earlier. 
+You can upsert your Points (ids, data, and payload), with the same `client.upsert()` method you used earlier.
 
 
 ```python
@@ -488,7 +488,7 @@ Next, you will use the payload to conduct a search query.
 
 ### 3.3 Search
 
-Now that you have your vectors with an ID and a payload, you can start searching for content when new music gets selected. 
+Now that you have your vectors with an ID and a payload, you can start searching for content when new music gets selected.
 
 Assume that a new song (like ["living la vida loca"](https://www.youtube.com/watch?v=p47fEXGabaY&ab_channel=RickyMartinVEVO) by Ricky Martin) comes in and our model immediately transforms it into a vector. Since we don't want a large amount of values back, let's limit the search to a few points.
 
@@ -589,7 +589,7 @@ client.clear_payload(
 
 ## 4. Recommendation systems
 
-A recommendation system is a technology that suggests items or content to users based on their preferences, interests, or past behavior. In its most widely-used form, recommendation systems work by analyzing data about you and other users. The system looks at your previous choices, such as movies you've watched, products you've bought, or articles you've read. It then compares this information with data from other people who have similar tastes or interests. 
+A recommendation system is a technology that suggests items or content to users based on their preferences, interests, or past behavior. In its most widely-used form, recommendation systems work by analyzing data about you and other users. The system looks at your previous choices, such as movies you've watched, products you've bought, or articles you've read. It then compares this information with data from other people who have similar tastes or interests.
 
 Such systems are used in various companies such as Netflix, Amazon, Tik-Tok, and Spotify. They aim to personalize your experience, save you time searching for things you might like, or introduce you to new and relevant content that you may not have discovered otherwise.
 
