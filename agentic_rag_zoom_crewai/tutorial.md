@@ -18,7 +18,7 @@ Think of it like upgrading from a librarian who retrieves books to a research as
 In this hands-on tutorial, we'll create a system that:
 
 1. Uses Qdrant to store and retrieve meeting transcripts as vector embeddings
-2. Leverages CrewAI agents to analyze and summarize meeting data  
+2. Leverages CrewAI agents to analyze and summarize meeting data
 3. Presents insights in a simple Streamlit interface for easy interaction
 
 ---
@@ -97,17 +97,17 @@ Our system combines vector search with AI agents to create a powerful meeting an
 
 ### **Key Components**
 
-1. **Data Processing Pipeline**  
+1. **Data Processing Pipeline**
    - Processes meeting transcripts and metadata
    - Creates embeddings with SentenceTransformer
    - Manages Qdrant collection and data upload
 
-2. **AI Agent System**  
+2. **AI Agent System**
    - Implements CrewAI agent logic
    - Handles vector search integration
    - Processes queries with Claude
 
-3. **User Interface**  
+3. **User Interface**
    - Provides chat-like web interface
    - Shows real-time processing feedback
    - Maintains conversation history
@@ -123,7 +123,7 @@ class MeetingData:
     def _initialize(self):
         self.data_dir = Path(__file__).parent.parent / 'data'
         self.meetings = self._load_meetings()
-        
+
         self.qdrant_client = QdrantClient(
             url=os.getenv('QDRANT_URL'),
             api_key=os.getenv('QDRANT_API_KEY')
@@ -161,7 +161,7 @@ Our AI system uses a tool-based approach. Let's start with the simplest tool - a
 class CalculatorTool(BaseTool):
     name: str = "calculator"
     description: str = "Perform basic mathematical calculations"
-    
+
     def _run(self, a: int, b: int) -> dict:
         return {
             "addition": a + b,
@@ -179,7 +179,7 @@ class SearchMeetingsTool(BaseTool):
             input=query
         )
         query_vector = response.data[0].embedding
-        
+
         return self.qdrant_client.search(
             collection_name='zoom_recordings',
             query_vector=query_vector,
@@ -193,11 +193,11 @@ The search results then feed into our analysis tool, which uses Claude to provid
 class MeetingAnalysisTool(BaseTool):
     def _run(self, meeting_data: dict) -> Dict:
         meetings_text = self._format_meetings(meeting_data)
-        
+
         message = client.messages.create(
             model="claude-3-sonnet-20240229",
             messages=[{
-                "role": "user", 
+                "role": "user",
                 "content": f"Analyze these meetings:\n\n{meetings_text}"
             }]
         )
@@ -276,7 +276,7 @@ with st.chat_message("assistant"):
     message_placeholder = st.empty()
     progress_bar = st.progress(0)
     console_placeholder = st.empty()
-    
+
     try:
         console_output = ConsoleOutput(console_placeholder)
         with contextlib.redirect_stdout(console_output):
@@ -302,7 +302,7 @@ We also include helpful examples and settings in the sidebar:
 with st.sidebar:
     st.header("Settings")
     search_limit = st.slider("Number of results", 1, 10, 5)
-    
+
     analysis_depth = st.select_slider(
         "Analysis Depth",
         options=["Basic", "Standard", "Detailed"],
