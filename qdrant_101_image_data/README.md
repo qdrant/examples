@@ -2,42 +2,42 @@
 
 ![crab](../images/crabmera.png)
 
-In this tutorial, you will learn how use semantic search for accurate skin cancer image comparison usign Qdrant and the 
+In this tutorial, you will learn how use semantic search for accurate skin cancer image comparison usign Qdrant and the
 Hugging Face `transformers` and `datasets` libraries.
 
 ## 1. Overview
 
 This aim of this tutorial is to walk you through the process of implementing semantic search techniques with image data and
-vector databases. In particular, we'll go over an example on how to assist doctors in comparing rare or challenging images 
-with labels representing different skin diseases. 
+vector databases. In particular, we'll go over an example on how to assist doctors in comparing rare or challenging images
+with labels representing different skin diseases.
 
-Why did we choose this example? With the power of semantic search, medical professionals could enhance 
-their diagnostic capabilities and make more accurate decisions regarding skin disease diagnosis. Effectively helping out 
+Why did we choose this example? With the power of semantic search, medical professionals could enhance
+their diagnostic capabilities and make more accurate decisions regarding skin disease diagnosis. Effectively helping out
 people in need of such medical evaluations.
 
-That said, you can swap the dataset used in this tutorial with your own and follow along with minimal adjustments to the code. 
+That said, you can swap the dataset used in this tutorial with your own and follow along with minimal adjustments to the code.
 
-The dataset used can be found in the [Hugging Face Hub](https://huggingface.co/datasets/marmal88/skin_cancer) and you don't 
+The dataset used can be found in the [Hugging Face Hub](https://huggingface.co/datasets/marmal88/skin_cancer) and you don't
 need to take any additional step to download it other than to run the code below.
 
 Here is a short description of each of the variables available in the dataset.
 - `image` - PIL objct of size 600x450
 - `image_id` - unique id for the image
 - `lesion_id` - unique id for the type of lesion on the skin of the patient
-- `dx` - diagnosis given to the patient (e.g., melanocytic_Nevi, melanoma, benign_keratosis-like_lesions, basal_cell_carcinoma, 
+- `dx` - diagnosis given to the patient (e.g., melanocytic_Nevi, melanoma, benign_keratosis-like_lesions, basal_cell_carcinoma,
 actinic_keratoses, vascular_lesions, dermatofibroma)
 - `dx_type` - type of diagnosis (e.g., histo, follow_up, consensus, confocal)
 - `age` - the age of the patients from 5 to 86 (some values are missing)
 - `sex` - the gender of the patient (female, male, and unknown)
-- `localization` - location of the spot in the body (e.g., 'lower extremity', 'upper extremity', 'neck', 'face', 'back', 
+- `localization` - location of the spot in the body (e.g., 'lower extremity', 'upper extremity', 'neck', 'face', 'back',
 'chest', 'ear', 'abdomen', 'scalp', 'hand', 'trunk', 'unknown', 'foot', 'genital', 'acral')
 
-By the end of the tutorial, you will be able to extract embeddings from images using transformers and conduct image-to-image 
+By the end of the tutorial, you will be able to extract embeddings from images using transformers and conduct image-to-image
 semantic search with Qdrant. Please note, we do assume a bit of familiarity with machine learning and vector databases concepts.
 
 ## 2. Set Up
 
-Before you run any line of code, please make sure you have 
+Before you run any line of code, please make sure you have
 1. downloaded the data
 2. created a virtual environment (if not in Google Colab)
 3. installed the packages below
@@ -56,9 +56,9 @@ source venv/bin/activate
 pip install qdrant-client transformers datasets torch numpy
 ```
 
-The open source version of Qdrant is available as a docker image and it can be pulled and run from any machine with docker 
-installed. If you don't have Docker installed in your PC you can follow the instructions in the official documentation 
-[here](https://docs.docker.com/get-docker/). After that, open your terminal and start by downloading the latest Qdrant 
+The open source version of Qdrant is available as a docker image and it can be pulled and run from any machine with docker
+installed. If you don't have Docker installed in your PC you can follow the instructions in the official documentation
+[here](https://docs.docker.com/get-docker/). After that, open your terminal and start by downloading the latest Qdrant
 image with the following command.
 
 ```sh
@@ -108,21 +108,21 @@ client.recreate_collection(
 
 ## 3. Image Embeddings
 
-In computer vision systems, vector databases are used to store image features. These image features are vector representations 
-of images that capture their visual content, and they are used to improve the performance of computer vision tasks such 
+In computer vision systems, vector databases are used to store image features. These image features are vector representations
+of images that capture their visual content, and they are used to improve the performance of computer vision tasks such
 as object detection, image classification, and image retrieval.
 
-To extract these useful feature representation from our images, we'll use vision transformers (ViT). ViTs are advanced 
-algorithms that enable computers to "see" and understand visual information in a similar fashion to humans. They 
+To extract these useful feature representation from our images, we'll use vision transformers (ViT). ViTs are advanced
+algorithms that enable computers to "see" and understand visual information in a similar fashion to humans. They
 use a transformer architecture to process images and extract meaningful features from them.
 
-To understand how ViTs work, imagine you have a large jigsaw puzzle with many different pieces. To solve the puzzle, 
-you would typically look at the individual pieces, their shapes, and how they fit together to form the full picture. ViTs 
-work in a similar way, meaning, instead of looking at the entire image at once, vision transformers break it down 
-into smaller parts called "patches." Each of these patches is like one piece of the puzzle that captures a specific portion 
+To understand how ViTs work, imagine you have a large jigsaw puzzle with many different pieces. To solve the puzzle,
+you would typically look at the individual pieces, their shapes, and how they fit together to form the full picture. ViTs
+work in a similar way, meaning, instead of looking at the entire image at once, vision transformers break it down
+into smaller parts called "patches." Each of these patches is like one piece of the puzzle that captures a specific portion
 of the image, and these pieces are then analyzed and processed by the ViTs.
 
-By analyzing these patches, the ViTs identify important patterns such as edges, colors, and textures, and combines them 
+By analyzing these patches, the ViTs identify important patterns such as edges, colors, and textures, and combines them
 to form a coherent understanding of a given image.
 
 That said, let's get started using transformers to extract features from our images.
@@ -176,27 +176,27 @@ image
 
 
 
-    
+
 ![png](04_qdrant_101_cv_files/04_qdrant_101_cv_14_0.png)
-    
 
 
 
-The image at index 8500, as shown above, is an instance of melanoma, which is a type of skin cancer that starts 
-in the cells called melanocytes. These are responsible for producing a pigment called melanin that gives color 
-to our skin, hair, and eyes. When melanocytes become damaged or mutate, they can start growing and dividing rapidly, 
-forming a cancerous growth known as melanoma. Melanoma often appears as an unusual or changing mole, spot, or 
-growth on the skin, and it can be caused by excessive exposure to ultraviolet (UV) radiation from the sun or 
-tanning beds, as well as genetic factors. If detected early, melanoma can usually be treated successfully, 
+
+The image at index 8500, as shown above, is an instance of melanoma, which is a type of skin cancer that starts
+in the cells called melanocytes. These are responsible for producing a pigment called melanin that gives color
+to our skin, hair, and eyes. When melanocytes become damaged or mutate, they can start growing and dividing rapidly,
+forming a cancerous growth known as melanoma. Melanoma often appears as an unusual or changing mole, spot, or
+growth on the skin, and it can be caused by excessive exposure to ultraviolet (UV) radiation from the sun or
+tanning beds, as well as genetic factors. If detected early, melanoma can usually be treated successfully,
 but if left untreated, it can spread to other parts of the body and become more difficult to treat.
 
-Because Melanoma can often be hard to detect, and we want to empower doctors with the ability to compare 
-and contrast cases that are difficult to classify without invasive procedures (i.e., by taking a sample of the 
-skin of the patient), we will create for them a system that allows them to compare images taken from patients 
+Because Melanoma can often be hard to detect, and we want to empower doctors with the ability to compare
+and contrast cases that are difficult to classify without invasive procedures (i.e., by taking a sample of the
+skin of the patient), we will create for them a system that allows them to compare images taken from patients
 with those already inside Qdrant in the shape of a vector.
 
-In order to search through the images and provide the most similar ones to the doctors, we'll need to download 
-a pre-trained model that will help us extract the embedding layer from our dataset. We'll do this using the 
+In order to search through the images and provide the most similar ones to the doctors, we'll need to download
+a pre-trained model that will help us extract the embedding layer from our dataset. We'll do this using the
 transformers library and Facebook's [DINO model](https://huggingface.co/facebook/dino-vitb8).
 
 
@@ -210,7 +210,7 @@ model = ViTModel.from_pretrained('facebook/dino-vits16').to(device)
     You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
 
 
-Let's process the instance of melanoma we selected earlier using our feature extractor from above. To learn more about `ViTImageProcessor` 
+Let's process the instance of melanoma we selected earlier using our feature extractor from above. To learn more about `ViTImageProcessor`
 and `ViTModel`, check out the [docs here](https://huggingface.co/docs/transformers/tasks/image_classification).
 
 
@@ -230,7 +230,7 @@ inputs['pixel_values'].shape, inputs
                [-1.1075, -1.1075, -1.0904,  ..., -1.4843, -1.5014, -1.5357],
                [-1.1075, -1.1075, -1.0904,  ..., -1.4843, -1.5185, -1.5528],
                [-1.1247, -1.1247, -1.0904,  ..., -1.4843, -1.5357, -1.5528]],
-     
+
               [[-1.7381, -1.7381, -1.7556,  ..., -1.5980, -1.6155, -1.6331],
                [-1.7381, -1.7381, -1.7556,  ..., -1.6155, -1.6331, -1.6506],
                [-1.7381, -1.7381, -1.7556,  ..., -1.5980, -1.6155, -1.6155],
@@ -238,7 +238,7 @@ inputs['pixel_values'].shape, inputs
                [-1.5630, -1.5630, -1.5630,  ..., -1.7731, -1.7906, -1.7906],
                [-1.5630, -1.5630, -1.5630,  ..., -1.7906, -1.7906, -1.8081],
                [-1.5805, -1.5805, -1.5630,  ..., -1.7906, -1.8081, -1.8081]],
-     
+
               [[-1.3513, -1.3687, -1.3861,  ..., -1.2119, -1.2119, -1.2293],
                [-1.3687, -1.3687, -1.3861,  ..., -1.2119, -1.2293, -1.2467],
                [-1.3687, -1.3861, -1.4036,  ..., -1.2119, -1.2119, -1.2293],
@@ -267,13 +267,13 @@ one_embedding.shape, one_embedding[0, 0, :20]
 
 
 
-As you can see above, what we get back from our preprocessing function is a multi-dimensional tensor represented 
-as [`batch_size`, `channels`, `rows`, `columns`]. The `batch_size` is the amount of samples passed through our 
-feature extractor and the channels represent the red, green, and blue hues of the image. Lastly, the rows and 
-columns, which can also be thought of as vectors and dimensions, represent the width and height of the image. This 
-4-dimensional representation is the input our model expects. In return, we get back a tensor 
-of [`batch_size`, `patches`, `dimensions`], and what's left for us to do is to choose a pooling method 
-for our embedding as it is not feasible to use 197 embedding vectors when one compressed one would suffice for our use 
+As you can see above, what we get back from our preprocessing function is a multi-dimensional tensor represented
+as [`batch_size`, `channels`, `rows`, `columns`]. The `batch_size` is the amount of samples passed through our
+feature extractor and the channels represent the red, green, and blue hues of the image. Lastly, the rows and
+columns, which can also be thought of as vectors and dimensions, represent the width and height of the image. This
+4-dimensional representation is the input our model expects. In return, we get back a tensor
+of [`batch_size`, `patches`, `dimensions`], and what's left for us to do is to choose a pooling method
+for our embedding as it is not feasible to use 197 embedding vectors when one compressed one would suffice for our use
 case. For the final step, we'll use mean pooling.
 
 
@@ -288,7 +288,7 @@ one_embedding.mean(dim=1).shape
 
 
 
-Let's create a function with the process we just walked through above and map it to our dataset to get an 
+Let's create a function with the process we just walked through above and map it to our dataset to get an
 embedding vector for each image.
 
 
@@ -317,9 +317,9 @@ dataset
 
 Notice above that we now have an embedding for each of the images in our dataset, and that's exactly what we were hoping for.
 
-We'll now save the vector of embeddings as a NumPy array so that we don't have to run it again later if 
-take a break or accidentally close down the tutorial. Then, what we want to do is to create a payload 
-with the metadata about each of our images. We can accomplish this by converting the rest of the 
+We'll now save the vector of embeddings as a NumPy array so that we don't have to run it again later if
+take a break or accidentally close down the tutorial. Then, what we want to do is to create a payload
+with the metadata about each of our images. We can accomplish this by converting the rest of the
 columns we didn't use into a JSON object for each sample.
 
 
@@ -360,11 +360,11 @@ payload[:3]
 
 
 
-Note that in the cell above we use `.fillna({"age": 0})`, that is because there are several missing values in the `age` column. Because 
-we don't want to assume the age of a patient, we'll leave this number as 0. Also, at the time of writing, Qdrant will not take in NumPy 
+Note that in the cell above we use `.fillna({"age": 0})`, that is because there are several missing values in the `age` column. Because
+we don't want to assume the age of a patient, we'll leave this number as 0. Also, at the time of writing, Qdrant will not take in NumPy
 `NaN`s but rather regular `None` Python values for anything that might be missing in our dataset.
 
-To make sure each image has an explicit `id` inside of the Qdrant collection we created earlier, we'll create a new column with a range of 
+To make sure each image has an explicit `id` inside of the Qdrant collection we created earlier, we'll create a new column with a range of
 numbers equivalent to the rows in our dataset. In addition, we'll load the embeddings we just saved.
 
 
@@ -402,7 +402,7 @@ We can make sure our vectors were uploaded successfully by counting them with th
 
 ```python
 client.count(
-    collection_name=my_collection, 
+    collection_name=my_collection,
     exact=True,
 )
 ```
@@ -438,13 +438,13 @@ client.scroll(
 
 ## 4. Semantic Search
 
-Semantic search, in the context of vector databases and image retrieval, refers to a method of searching for information or images 
-based on their meaning or content rather than just using keywords. Imagine you're looking for a specific picture of a skin disease and you 
-don't know the file name or where it is stored. With semantic search, you can describe what you're looking for using words like 
-"red rashes with blisters," or you can upload an image that will get processed into an embedding vector, and the system will then analyze 
+Semantic search, in the context of vector databases and image retrieval, refers to a method of searching for information or images
+based on their meaning or content rather than just using keywords. Imagine you're looking for a specific picture of a skin disease and you
+don't know the file name or where it is stored. With semantic search, you can describe what you're looking for using words like
+"red rashes with blisters," or you can upload an image that will get processed into an embedding vector, and the system will then analyze
 the content of the images to find matches that closely match your description or input image.
 
-Semantic search enables a more intuitive and efficient way of searching for images, making it easier to find what you're 
+Semantic search enables a more intuitive and efficient way of searching for images, making it easier to find what you're
 looking for, even if you can't remember specific details or tags.
 
 With Qdrant, we can get started searching through our collection with the `client.search()` method.
@@ -474,9 +474,9 @@ client.search(
 
 
 
-As you can see in the cell above, we used the melanoma image from earlier and got back other images with Melanoma. The similarity 
-score also gives us a good indication regarding the similarity of our query image and those in our database (excluding the first one 
-which is the image itself, of course). But what if our doctors want to look for images from patients as demographically similar 
+As you can see in the cell above, we used the melanoma image from earlier and got back other images with Melanoma. The similarity
+score also gives us a good indication regarding the similarity of our query image and those in our database (excluding the first one
+which is the image itself, of course). But what if our doctors want to look for images from patients as demographically similar
 to the one they are evaluating. For this, we can take advantage of Qdrant's Filters.
 
 
@@ -518,11 +518,11 @@ results
 
 
 
-Notice on the payload above how we were able to match the doctors' criteria effortlessly. We can include much convoluted 
+Notice on the payload above how we were able to match the doctors' criteria effortlessly. We can include much convoluted
 requests using the other filtering methods available in Qdrant. For more info, please check out the [docs here](https://qdrant.tech/documentation/concepts/filtering/).
 
-It is important to figure out early whether users of our application should see the similarity score of the results of their search as 
-this would give them an idea as to how useful the images might be. In addition, they could set up a similarity threshold in Qdrant 
+It is important to figure out early whether users of our application should see the similarity score of the results of their search as
+this would give them an idea as to how useful the images might be. In addition, they could set up a similarity threshold in Qdrant
 and further distill the results they get back.
 
 Let's evaluate visually the images we just got.
@@ -561,13 +561,13 @@ see_images(results, 3)
 
 
 
-    
+
 ![png](04_qdrant_101_cv_files/04_qdrant_101_cv_45_2.png)
-    
+
 
 
     --------------------------------------------------
-    
+
 
 
 
@@ -579,13 +579,13 @@ see_images(results, 3)
 
 
 
-    
+
 ![png](04_qdrant_101_cv_files/04_qdrant_101_cv_45_6.png)
-    
+
 
 
     --------------------------------------------------
-    
+
 
 
 
@@ -597,19 +597,19 @@ see_images(results, 3)
 
 
 
-    
+
 ![png](04_qdrant_101_cv_files/04_qdrant_101_cv_45_10.png)
-    
+
 
 
     --------------------------------------------------
-    
+
 
 
 Great! All images do contain an instance of Melanoma and our search query did provide accurate results.
 
-In critical applications where the stakes are high, it might be useful to provide doctors with a similarity 
-threshold so that they can be more confident of the result they are seeing. Let's pick another image and see how to 
+In critical applications where the stakes are high, it might be useful to provide doctors with a similarity
+threshold so that they can be more confident of the result they are seeing. Let's pick another image and see how to
 do this with Qdrant.
 
 
@@ -623,9 +623,9 @@ display(another_image['image'])
 
 
 
-    
+
 ![png](04_qdrant_101_cv_files/04_qdrant_101_cv_47_1.png)
-    
+
 
 
 
@@ -652,10 +652,10 @@ results2[:7]
 
 
 
-We can see that none of the results that came back have a cosine similarity score of less than 92%, and this 
-exactly the behaviour we were expecting. Now, what if the dermatologist evaluating the results wanted to search 
-only through specific images because they remembered these were very similar spots to those on the current 
-patient's skin? The answer is that we could explicitly give the dermatologist a way to search images that match an id. 
+We can see that none of the results that came back have a cosine similarity score of less than 92%, and this
+exactly the behaviour we were expecting. Now, what if the dermatologist evaluating the results wanted to search
+only through specific images because they remembered these were very similar spots to those on the current
+patient's skin? The answer is that we could explicitly give the dermatologist a way to search images that match an id.
 Let's create range of ids from 5000 to 6000 in steps of 20, and have our query return only vectors in this range.
 
 
@@ -685,13 +685,13 @@ client.search(
 
 
 
-In a more realistic scenario, the ids we used in the above query would be specifics ones selected by the 
-doctor. The nice thing is that Qdrant provides enough flexibility to let developers decide how they want 
+In a more realistic scenario, the ids we used in the above query would be specifics ones selected by the
+doctor. The nice thing is that Qdrant provides enough flexibility to let developers decide how they want
 to have doctors interact with the user interface of an app developed for this use case.
 
-What if the dermatologist wanted to exclude specific samples that may have been included twice, by accident, or 
-as the product of synthetic data algorithm? We can follow the same process as above and swap the `must=` parameter 
-for `must_not'` and you'll notice how our search results now don't include ids in the range we provided anymore. 
+What if the dermatologist wanted to exclude specific samples that may have been included twice, by accident, or
+as the product of synthetic data algorithm? We can follow the same process as above and swap the `must=` parameter
+for `must_not'` and you'll notice how our search results now don't include ids in the range we provided anymore.
 
 
 ```python
@@ -719,8 +719,8 @@ client.search(
 
 
 
-If the reason doctors are searching for images in a vector database is because they need help to make a decision, 
-then they will most-likely want to evaluate images **with** and **without** the decease. Let's select another sample 
+If the reason doctors are searching for images in a vector database is because they need help to make a decision,
+then they will most-likely want to evaluate images **with** and **without** the decease. Let's select another sample
 of melanoma and compare it to images similar to it without cancer and not located on the face or the neck.
 
 
@@ -732,9 +732,9 @@ melo_sample_2['image']
 
 
 
-    
+
 ![png](04_qdrant_101_cv_files/04_qdrant_101_cv_54_0.png)
-    
+
 
 
 
@@ -787,13 +787,13 @@ see_images(results3, 3)
 
 
 
-    
+
 ![png](04_qdrant_101_cv_files/04_qdrant_101_cv_57_2.png)
-    
+
 
 
     --------------------------------------------------
-    
+
 
 
 
@@ -805,13 +805,13 @@ see_images(results3, 3)
 
 
 
-    
+
 ![png](04_qdrant_101_cv_files/04_qdrant_101_cv_57_6.png)
-    
+
 
 
     --------------------------------------------------
-    
+
 
 
 
@@ -823,22 +823,22 @@ see_images(results3, 3)
 
 
 
-    
+
 ![png](04_qdrant_101_cv_files/04_qdrant_101_cv_57_10.png)
-    
+
 
 
     --------------------------------------------------
-    
 
 
-Judging by the images above, doctors can have a pretty tough job when it comes to diagnosing 
-people. Some benign diseases like the ones above can often look like cancerous spots while in reality 
+
+Judging by the images above, doctors can have a pretty tough job when it comes to diagnosing
+people. Some benign diseases like the ones above can often look like cancerous spots while in reality
 the patient is not at risk and can avoid a potentially costly and painful procedure.
 
-Lastly, what if there were a team of doctors working evaluating different samples of skin cancer, 
-each could have its own version of the tool or we could batch those queries and leave the logic 
-on how to serve the results to the developers at the hospital. Let's write two different queries and 
+Lastly, what if there were a team of doctors working evaluating different samples of skin cancer,
+each could have its own version of the tool or we could batch those queries and leave the logic
+on how to serve the results to the developers at the hospital. Let's write two different queries and
 collect all of the results at once.
 
 
@@ -916,7 +916,7 @@ client.search_batch(
 
 
 
-Excellent! Notice how we got back two lists of results that respect the criteria we've chosen to filter by, and 
+Excellent! Notice how we got back two lists of results that respect the criteria we've chosen to filter by, and
 the payload we wanted to exclude from each.
 
 That's it! In the next section, we will create an app to showcase the usability of our search engine, Qdrant.
@@ -952,7 +952,7 @@ if image_file:
 
     st.markdown("## Semantic Search")
     results = client.search(collection_name="image_collection", query_vector=outputs[0], limit=search_top_k)
-    
+
     for i in range(search_top_k):
         st.header(f"Decease: {results[i].payload['dx']}")
         st.subheader(f"Image ID: {results[i].payload['image_id']}")
@@ -971,9 +971,9 @@ if image_file:
 
 ## 5. Final Thoughts
 
-We have covered quite a bit in this tutorial, and we've only scratched the surface of what we can 
-do with vectors from images and Qdrant. Since we can appreciate hoy there are a lot of moving parts when 
-it comes to converting images into vectors or how to go beyond sematic search with Qdrant, here are 
+We have covered quite a bit in this tutorial, and we've only scratched the surface of what we can
+do with vectors from images and Qdrant. Since we can appreciate hoy there are a lot of moving parts when
+it comes to converting images into vectors or how to go beyond sematic search with Qdrant, here are
 tutorials you can go through to increase your knowledge on these topics.
 
 - [Fine Tuning Similar Cars Search](https://qdrant.tech/articles/cars-recognition/)

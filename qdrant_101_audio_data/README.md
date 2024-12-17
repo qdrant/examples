@@ -2,20 +2,20 @@
 
 ![main](../images/main_pic.png)
 
-Welcome to this tutorial on vector databases and music recommendation systems using Python and Qdrant. Here, 
+Welcome to this tutorial on vector databases and music recommendation systems using Python and Qdrant. Here,
 we will learn about how to get started with audio data, embeddings and vector databases.
 
-By the end of this tutorial, you will have a good understanding of how to use vector databases and Python to 
+By the end of this tutorial, you will have a good understanding of how to use vector databases and Python to
 create your own music recommendation engine.
 
 ## 1. Overview
 
-The dataset we will be using is called, 
-[Ludwig Music Dataset (Moods and Subgenres)](https://www.kaggle.com/datasets/jorgeruizdev/ludwig-music-dataset-moods-and-subgenres) 
-and it can be found on Kaggle. It was collected for the purpose of music information retrieval (MIR) by 
-[Discogs](discogs.com) and [AcousticBrainZ](acousticbrainz.org), and it contains over 10,000 songs of 
-different genres and subgenres. Bare in mind that the full dataset is 12GB in size so we recommend that 
-you download your favorite genre from the `mp3` directory, and the `labels.json` file. That will be more 
+The dataset we will be using is called,
+[Ludwig Music Dataset (Moods and Subgenres)](https://www.kaggle.com/datasets/jorgeruizdev/ludwig-music-dataset-moods-and-subgenres)
+and it can be found on Kaggle. It was collected for the purpose of music information retrieval (MIR) by
+[Discogs](discogs.com) and [AcousticBrainZ](acousticbrainz.org), and it contains over 10,000 songs of
+different genres and subgenres. Bare in mind that the full dataset is 12GB in size so we recommend that
+you download your favorite genre from the `mp3` directory, and the `labels.json` file. That will be more
 than enough to follow along for the rest of the tutorial.
 
 Once you download the full dataset, you should see the following directories and files.
@@ -38,9 +38,9 @@ Once you download the full dataset, you should see the following directories and
 
 The `labels.json` contain all the metadata (e.g. artist, subgenre, album, etc.) associated with each song.
 
-The `Spectograms` directory contains spectograms, which are visual representation of the frequencies present 
-in an audio signal over time. It is a 2D graph where the x-axis represents time and the y-axis represents 
-frequency. The intensity of the color or brightness of the graph indicates the strength or amplitude of the 
+The `Spectograms` directory contains spectograms, which are visual representation of the frequencies present
+in an audio signal over time. It is a 2D graph where the x-axis represents time and the y-axis represents
+frequency. The intensity of the color or brightness of the graph indicates the strength or amplitude of the
 frequencies at a particular time. Here is an example of a Spectogram.
 
 <p align="center">
@@ -53,7 +53,7 @@ Let's get our environment set up before we prepare the data.
 
 ## 2. Set Up
 
-Before you run any line of code, please make sure you have 
+Before you run any line of code, please make sure you have
 1. downloaded the data
 2. created a virtual environment (if not in Google Colab)
 3. installed the packages below
@@ -72,9 +72,9 @@ source venv/bin/activate
 pip install qdrant-client transformers datasets pandas numpy torch librosa tensorflow openl3 panns-inference pedalboard streamlit
 ```
 
-The open source version of Qdrant is available as a docker image and it can be pulled and run from 
-any machine with docker installed. If you don't have Docker installed in your PC you can follow the 
-instructions available in the official documentation [here](https://docs.docker.com/get-docker/). After 
+The open source version of Qdrant is available as a docker image and it can be pulled and run from
+any machine with docker installed. If you don't have Docker installed in your PC you can follow the
+instructions available in the official documentation [here](https://docs.docker.com/get-docker/). After
 that, open your terminal and start by downloading the image with the following command.
 
 ```sh
@@ -112,7 +112,7 @@ import torch
 client = QdrantClient(host="localhost", port=6333)
 ```
 
-We will also go ahead and create the collection we will be working with in this tutorial. The dimensions will 
+We will also go ahead and create the collection we will be working with in this tutorial. The dimensions will
 be of size 2048 and we'll set the distance metric to cosine similarity.
 
 
@@ -177,8 +177,8 @@ music_data[115]
 
 
 
-As you can see, we got back json objects with an array representing our songs, the path to where each 
-one of them is located in our PC, and the sampling rate for each. Let's play the song at index 115 and 
+As you can see, we got back json objects with an array representing our songs, the path to where each
+one of them is located in our PC, and the sampling rate for each. Let's play the song at index 115 and
 see what it sounds like.
 
 
@@ -188,8 +188,8 @@ player(music_data[115]['audio']['array'], rate=44100)
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/0rXvhxGisD2djBmNkrv5Gt?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
 
-We'll need to extract the name of each mp3 file as this is the unique identifier we'll use in order to 
-get the corresponding metadata for each song. While we are at it, we will also create a range of numbers 
+We'll need to extract the name of each mp3 file as this is the unique identifier we'll use in order to
+get the corresponding metadata for each song. While we are at it, we will also create a range of numbers
 and add it as the index to the dataset.
 
 
@@ -202,7 +202,7 @@ ids = [
      .split("/") # split it by /
      [-1] # take only the last piece "id.mp3"
      .replace(".mp3", '') # and replace the .mp3 with nothing
-    ) 
+    )
     for i in range(len(music_data))
 ]
 index = [num for num in range(len(music_data))]
@@ -295,7 +295,7 @@ labels.head()
 
 
 
-As you can see, the dictionaries above contain a lot of useful information. Let's create a 
+As you can see, the dictionaries above contain a lot of useful information. Let's create a
 function to extract the data we want retrieve for our out recommendation system.
 
 
@@ -394,7 +394,7 @@ clean_labels.head()
 
 
 
-The last piece of the puzzle is to clean the subgenres a bit, and to extract the path to each of the 
+The last piece of the puzzle is to clean the subgenres a bit, and to extract the path to each of the
 files since we will need them to load the recommendations in our app later on.
 
 
@@ -619,37 +619,37 @@ payload[:3]
 
 ## 4. Embeddings
 
-Audio embeddings are low dimensional vector representations of audio signals and they capture 
-important features such as the pitch, timbre, and spatial characteristics of sound. These 
-embeddings can be used as compact and meaningful representations of audio signals for various 
-downstream audio processing tasks such as speech recognition, speaker recognition, music genre 
-classification, and event detection. These embeddings are generally obtained using deep neural 
-networks that take in an audio signal as input, and output a learned low-dimensional feature 
-representation for that audio. In addition, these embeddings can also be used as input to 
+Audio embeddings are low dimensional vector representations of audio signals and they capture
+important features such as the pitch, timbre, and spatial characteristics of sound. These
+embeddings can be used as compact and meaningful representations of audio signals for various
+downstream audio processing tasks such as speech recognition, speaker recognition, music genre
+classification, and event detection. These embeddings are generally obtained using deep neural
+networks that take in an audio signal as input, and output a learned low-dimensional feature
+representation for that audio. In addition, these embeddings can also be used as input to
 further machine learning models.
 
 There are different ways in which we can get started creating embeddings for our songs:
-1. by training a deep neural network from scratch on our dataset and extracting the embedding layer, 
-2. by using a pre-trained model and the transformers Python library, or 
+1. by training a deep neural network from scratch on our dataset and extracting the embedding layer,
+2. by using a pre-trained model and the transformers Python library, or
 3. by using purpose-built libraries like openl3 and pann_inference.
 
-There are other ways, of course, but here we'll use 2 and 3, the transformers architecture, and 
+There are other ways, of course, but here we'll use 2 and 3, the transformers architecture, and
 openl3 and pann_inference libraries.
 
-**Important INFO**: While there are three approached showcased here, you only need to pick one to 
+**Important INFO**: While there are three approached showcased here, you only need to pick one to
 continue with the tutorial. Here, we will follow along using the output from `panns_inference`.
 
 Let's get started.
 
 ### openl3
 
-[OpenL3](https://github.com/marl/openl3/tree/main) is an open-source Python library for computing 
-deep audio and image embeddings. It was created to provide an easy-to-use framework for extracting 
-embeddings from audio and image data using pre-trained deep neural network models. The library 
-includes pre-trained audio models like VGGish, YAMNet, and SoundNet, as well as pre-trained image 
-models like ResNet and Inception. These models can be used for a variety of audio and image 
-processing tasks, such as speech recognition, music genre classification, and object detection. Overall, 
-OpenL3 is designed to make it easier for researchers and developers to incorporate deep learning 
+[OpenL3](https://github.com/marl/openl3/tree/main) is an open-source Python library for computing
+deep audio and image embeddings. It was created to provide an easy-to-use framework for extracting
+embeddings from audio and image data using pre-trained deep neural network models. The library
+includes pre-trained audio models like VGGish, YAMNet, and SoundNet, as well as pre-trained image
+models like ResNet and Inception. These models can be used for a variety of audio and image
+processing tasks, such as speech recognition, music genre classification, and object detection. Overall,
+OpenL3 is designed to make it easier for researchers and developers to incorporate deep learning
 models into their audio and image processing workflows.
 
 Let's read in an audio file and extract the embedding layer with openl3.
@@ -678,7 +678,7 @@ player(audio, rate=sr)
 open_emb, ts = openl3.get_audio_embedding(audio, sr, input_repr="mel128", frontend='librosa')
 ```
 
-The model returns an embedding vector for each timestamp and a timestamp vector. This means that 
+The model returns an embedding vector for each timestamp and a timestamp vector. This means that
 to get a one dimensional embedding for the whole song, we'll need to get the mean of this vectors.
 
 
@@ -686,7 +686,7 @@ to get a one dimensional embedding for the whole song, we'll need to get the mea
 open_emb.shape, open_emb.mean(axis=0).shape, open_emb.mean(axis=0)[:20]
 ```
 
-You can generate your embedding layer for the whole dataset with the following function. Note that 
+You can generate your embedding layer for the whole dataset with the following function. Note that
 loading the model first, in particular Kapre, will work on a GPU without any further configuration.
 
 
@@ -709,20 +709,20 @@ music_data = music_data.map(get_open_embs, batched=True, batch_size=20)
 music_data
 ```
 
-The nice thing about openl3 is that it comes with the best model for our task. The downside is 
+The nice thing about openl3 is that it comes with the best model for our task. The downside is
 that it is the slowest of the three methods showcased here.
 
 ### Panns Inference
 
-The `panns_inference` library is a Python package built on top of PyTorch and torchaudio that 
-provides an interface for audio tagging and sound event detection tasks. It implements CNN-based 
-models trained on large-scale audio datasets such as AudioSet and UrbanSound8K. The package was 
-created to make it easy for researchers and practitioners to use these pre-trained models for 
-inference on their own audio datasets, without needing to train their own models from scratch. The 
-`panns_inference` library provides a high-level, user-friendly API for loading pre-trained models, 
+The `panns_inference` library is a Python package built on top of PyTorch and torchaudio that
+provides an interface for audio tagging and sound event detection tasks. It implements CNN-based
+models trained on large-scale audio datasets such as AudioSet and UrbanSound8K. The package was
+created to make it easy for researchers and practitioners to use these pre-trained models for
+inference on their own audio datasets, without needing to train their own models from scratch. The
+`panns_inference` library provides a high-level, user-friendly API for loading pre-trained models,
 generating embeddings, and performing audio classification tasks in just a few lines of code.
 
-The `panns_inference` package requires that the data is either as a numpy array or as a torch 
+The `panns_inference` package requires that the data is either as a numpy array or as a torch
 tensor, both of shape `[batch, vector]` so let's reshape our song.
 
 
@@ -738,8 +738,8 @@ audio2.shape
 
 
 
-Bare in mind that this next step, downloading the model, can take quite a bit of time depending on 
-your internet speed. Afterwards, inference is quite fast and the model will return to us two 
+Bare in mind that this next step, downloading the model, can take quite a bit of time depending on
+your internet speed. Afterwards, inference is quite fast and the model will return to us two
 vectors, the timestamps and the embeddings.
 
 
@@ -785,7 +785,7 @@ embedding[0, 470:500]
 
 
 
-To get an embedding layer for all of the songs using the `panns_inference` package, you can use the following 
+To get an embedding layer for all of the songs using the `panns_inference` package, you can use the following
 function. This is the output we will be using for the remainder of the tutorial.
 
 
@@ -813,13 +813,13 @@ music_data
 
 ### Transformers
 
-Transformers are a type of neural network used for natural language processing, but the architecture 
-can also be used for processing audio data by breaking the sound waves into smaller parts and learning 
+Transformers are a type of neural network used for natural language processing, but the architecture
+can also be used for processing audio data by breaking the sound waves into smaller parts and learning
 how those parts fit together to form meaning.
 
-We can load a pre-trained model from the Hugging Face hub and extract the embeddings from it. Note 
-that this step will give us the worst result of the three since Wav2Vec was trained to recognize 
-speech rather than to classify music genres. Hence, it is important to note that fine-tunning the 
+We can load a pre-trained model from the Hugging Face hub and extract the embeddings from it. Note
+that this step will give us the worst result of the three since Wav2Vec was trained to recognize
+speech rather than to classify music genres. Hence, it is important to note that fine-tunning the
 data with Wav2Vec might not improve a whole lot the quality of the embeddings.
 
 
@@ -829,7 +829,7 @@ model = AutoModel.from_pretrained('facebook/wav2vec2-base').to(device)
 feature_extractor = AutoFeatureExtractor.from_pretrained('facebook/wav2vec2-base')
 ```
 
-A key step before extracting the features from each song and passing them through the model 
+A key step before extracting the features from each song and passing them through the model
 is to resample the songs 16kHz.
 
 
@@ -878,13 +878,13 @@ def get_trans_embs(batch):
     audio_arrays = [x["array"] for x in batch["audio"]]
 
     inputs = feature_extractor(
-        audio_arrays, sampling_rate=16_000, return_tensors="pt", padding=True, 
+        audio_arrays, sampling_rate=16_000, return_tensors="pt", padding=True,
         return_attention_mask=True, max_length=16_000, truncation=True
     ).to(device)
 
     with torch.no_grad():
         pooled_embeds = model(**inputs).last_hidden_state.mean(dim=1)
-    
+
     return {"transform_embeddings": pooled_embeds.cpu().numpy()}
 ```
 
@@ -897,13 +897,13 @@ music_data
 
 ## 5. Building a Recommendation System
 
-Recommendation systems are algorithms and techniques used to suggest items or content to users 
-based on their preferences, historical data, or behavior. These systems aim to provide personalized 
-recommendations to users, helping them discover new items of interest and enhancing their overall 
-user experience. Recommendation systems are widely used in various domains such as e-commerce, 
+Recommendation systems are algorithms and techniques used to suggest items or content to users
+based on their preferences, historical data, or behavior. These systems aim to provide personalized
+recommendations to users, helping them discover new items of interest and enhancing their overall
+user experience. Recommendation systems are widely used in various domains such as e-commerce,
 streaming platforms, social media, and more.
 
-Let's start by populating the collection we created earlier. If you picked the transformers approach 
+Let's start by populating the collection we created earlier. If you picked the transformers approach
 or openl3 to follow along, you will need to recreate your collection with the appropriate dimension size.
 
 
@@ -925,7 +925,7 @@ client.upsert(
 
 
 
-We can retrieve any song by its id using `client.retrieve()` and then extract the information 
+We can retrieve any song by its id using `client.retrieve()` and then extract the information
 in the payload with the `.payload` attribute.
 
 
@@ -961,7 +961,7 @@ player(r[0], rate=r[1])
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/0lyeChzw7IWf9ytZ7S0jDK?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
 
-You can search for similar songs with the `client.search()` method. Let's find and artist and a song 
+You can search for similar songs with the `client.search()` method. Let's find and artist and a song
 we like and use that id to grab the embedding and search for similar songs.
 
 PS. Here is [Celia Cruz](https://www.youtube.com/watch?v=AXN-_asIaYs&ab_channel=GravityLimited). 😎
@@ -1073,12 +1073,12 @@ client.search(
 
 
 
-You can evaluate the search results by looking at the score or by listening to the songs and 
-judging how similar they really are. I, the author, can vouch for the quality of the ones we 
+You can evaluate the search results by looking at the score or by listening to the songs and
+judging how similar they really are. I, the author, can vouch for the quality of the ones we
 got for Celia Cruz. 😎
 
-The recommendation API works a bit differently, we don't need a vector query but rather the 
-ids of positive (required) vectors and negative (optional) ones, and Qdrant will do the heavy 
+The recommendation API works a bit differently, we don't need a vector query but rather the
+ids of positive (required) vectors and negative (optional) ones, and Qdrant will do the heavy
 lifting for us.
 
 
@@ -1101,8 +1101,8 @@ client.recommend(
 
 
 
-Say we don't like [Chayanne](https://www.youtube.com/watch?v=GQa10n21YIw&ab_channel=AnnunziattaGibson) 
-because his songs are too mushy. We can use the id of one of his mushiest songs so that Qdrant gets 
+Say we don't like [Chayanne](https://www.youtube.com/watch?v=GQa10n21YIw&ab_channel=AnnunziattaGibson)
+because his songs are too mushy. We can use the id of one of his mushiest songs so that Qdrant gets
 us results as far away as possible from such a song.
 
 
@@ -1218,7 +1218,7 @@ client.recommend(
 
 
 
-Say we want to get recommendations based on a song we just recently listened to and liked, 
+Say we want to get recommendations based on a song we just recently listened to and liked,
 and that the system remembers all of our preferences.
 
 
@@ -1247,7 +1247,7 @@ client.recommend(
 
 
 
-Lastly, imagine we want a [Samba](https://www.youtube.com/watch?v=m3WtyqJzLAI&ab_channel=luka%C4%8Denko7) 
+Lastly, imagine we want a [Samba](https://www.youtube.com/watch?v=m3WtyqJzLAI&ab_channel=luka%C4%8Denko7)
 filter for the recommendations we get, the UI could have tags for us to choose from and Qdrant would do the rest.
 
 
@@ -1287,14 +1287,14 @@ for result in results:
     display(player(song, rate=sr))
 ```
 
-That's it! So, what's next? You should try using different genres (or all of them), creating embeddings 
-for these and then building your own recommendation engine on top of Qdrant. Better yet, you could 
-find your own dataset and build a personalized search engine for the things you like, just make sure 
+That's it! So, what's next? You should try using different genres (or all of them), creating embeddings
+for these and then building your own recommendation engine on top of Qdrant. Better yet, you could
+find your own dataset and build a personalized search engine for the things you like, just make sure
 you let us know via our [discord channel here](https://qdrant.to/discord). 😎
 
 ## 6. Putting it All Together
 
-Now that we have covered everything we need, it is time to put it to the test with a UI, and 
+Now that we have covered everything we need, it is time to put it to the test with a UI, and
 for this, we'll use [streamlit](https://streamlit.io/).
 
 
@@ -1326,7 +1326,7 @@ if music_file:
 
     st.markdown("## Semantic Search")
     results = client.search(collection_name="music_collection", query_vector=emb[0], limit=4)
-    
+
     for result in results:
         st.header(f"Song: {result.payload['name']}")
         st.subheader(f"Artist: {result.payload['artist']}")

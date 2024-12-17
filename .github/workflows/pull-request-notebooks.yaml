@@ -1,0 +1,81 @@
+name: Pull request notebooks to landing page
+
+on:
+  pull_request:
+#    types: [ closed ]
+#    branches:
+#      - main
+#      - master
+    paths:
+      - '**.ipynb'
+
+env:
+  TARGET_REPO: 'kacperlukawski/landing_page'
+
+jobs:
+  convert-notebooks:
+    name: Push notebooks to landing page
+    runs-on: ubuntu-latest
+
+    # TODO: uncomment once it's stable
+    # This job will only run if the PR has been merged
+    # if: github.event.pull_request.merged == true
+
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v4
+        with:
+          path: 'examples'
+
+      - name: Checkout landing page repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TARGET_REPO }}
+          path: 'landing_page'
+          token: ${{ secrets.API_TOKEN_GITHUB }}
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'poetry'
+      - run: |
+          cd examples
+          poetry install --with dev
+
+      - name: Convert notebooks
+        run: |
+          cd examples
+          poetry run python .scripts/convert-all-notebooks-to-hugo-markdown.py
+
+      - name: Copy converted notebooks to landing page
+        run: |
+          mkdir -p landing_page/qdrant-landing/content/documentation/
+          cp -n -r examples/.dist/* landing_page/qdrant-landing/content/documentation/
+
+      - name: Commit changes to a new branch
+        env:
+          GH_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
+          USER_NAME: '${{ github.actor }}'
+          USER_EMAIL: '${{ github.actor }}@users.noreply.github.com'
+          TARGET_BRANCH: 'examples/${{ github.event.pull_request.head.ref }}-pr-${{ github.event.pull_request.number }}'
+        run: |
+          cd landing_page
+          git config user.name $USER_NAME
+          git config user.email $USER_EMAIL
+          git checkout -b $TARGET_BRANCH
+          git add .
+          git commit -m "${{ github.event.pull_request.title }}"
+          git push --set-upstream origin $TARGET_BRANCH
+
+          # Check if there is an existing PR for this branch
+          PR_ID=$(gh pr list --state open --base master --head $TARGET_BRANCH --json number | jq -r '.[0].number')
+          if [ -z "$PR_ID" ]; then
+            gh pr create \
+              --title "${{ github.event.pull_request.title }}" \
+              --body "Add notebooks from PR ${{ github.event.repository.name }}#${{ github.event.pull_request.number }}" \
+              --base master \
+              --head $TARGET_BRANCH
+          fi
