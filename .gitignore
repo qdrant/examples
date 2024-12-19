@@ -2,10 +2,10 @@ data/sample/*
 qdrant_storage/
 qdrant_101/notes
 .ipynb_checkpoints
-qdrant_101_image_data/vecs.npy
+101-foundations/qdrant_101_image_data/vecs.npy
 data
-qdrant_101_image_data/vectors.npy
-qdrant_101_image_data/image_search_app.py
+101-foundations/qdrant_101_image_data/vectors.npy
+101-foundations/qdrant_101_image_data/image_search_app.py
 *.json
 */*.log
 */.env

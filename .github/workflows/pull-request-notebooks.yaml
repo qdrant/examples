@@ -11,6 +11,7 @@ on:
 
 env:
   TARGET_REPO: 'kacperlukawski/landing_page'
+  TARGET_BRANCH: 'examples/${{ github.event.pull_request.head.ref }}-pr-${{ github.event.pull_request.number }}'
 
 jobs:
   convert-notebooks:
@@ -26,6 +27,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: 'examples'
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
 
       - name: Checkout landing page repository
         uses: actions/checkout@v4
@@ -33,6 +36,11 @@ jobs:
           repository: ${{ env.TARGET_REPO }}
           path: 'landing_page'
           token: ${{ secrets.API_TOKEN_GITHUB }}
+
+      - name: Checkout the target branch of the landing page repository
+        run: |
+          cd landing_page
+          git fetch origin $TARGET_BRANCH:$TARGET_BRANCH || git checkout -b $TARGET_BRANCH
 
       - name: Install poetry
         run: pipx install poetry
@@ -52,30 +60,29 @@ jobs:
 
       - name: Copy converted notebooks to landing page
         run: |
-          mkdir -p landing_page/qdrant-landing/content/documentation/
-          cp -n -r examples/.dist/* landing_page/qdrant-landing/content/documentation/
+          cp --update=none -r examples/.dist/* landing_page/
 
-      - name: Commit changes to a new branch
+      - name: Commit changes to a new branch and start a PR
         env:
           GH_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
           USER_NAME: '${{ github.actor }}'
           USER_EMAIL: '${{ github.actor }}@users.noreply.github.com'
-          TARGET_BRANCH: 'examples/${{ github.event.pull_request.head.ref }}-pr-${{ github.event.pull_request.number }}'
         run: |
           cd landing_page
           git config user.name $USER_NAME
           git config user.email $USER_EMAIL
-          git checkout -b $TARGET_BRANCH
           git add .
           git commit -m "${{ github.event.pull_request.title }}"
           git push --set-upstream origin $TARGET_BRANCH
 
           # Check if there is an existing PR for this branch
-          PR_ID=$(gh pr list --state open --base master --head $TARGET_BRANCH --json number | jq -r '.[0].number')
-          if [ -z "$PR_ID" ]; then
+          PR_ID=$(gh pr list --repo "${{ env.TARGET_REPO }}" --state open --base master --head "${{ env.TARGET_BRANCH }}" --json number | jq -r '.[0].number')
+          if [ -n "$PR_ID" ]; then
             gh pr create \
               --title "${{ github.event.pull_request.title }}" \
               --body "Add notebooks from PR ${{ github.event.repository.name }}#${{ github.event.pull_request.number }}" \
               --base master \
               --head $TARGET_BRANCH
+          else
+            echo "PR already exists: $PR_ID"
           fi

@@ -17,10 +17,11 @@ from mdformat.renderer import MDRenderer
 from mdformat_frontmatter import plugin as mdformat_front_matter_plugin
 from mdformat_tables import plugin as tables_plugin
 from mdit_py_plugins.front_matter import front_matter_plugin
-from mdit_py_plugins.wordcount import wordcount_plugin
 from nbconvert import MarkdownExporter
 
-from .git import GitHubRepository
+from .plugins.word_count import word_count_plugin
+
+MAIN_DIR = Path(__file__).parent.parent.parent
 
 
 @dataclass
@@ -57,11 +58,10 @@ class NotebookToHugoMarkdownConverter:
                 renderer_cls=MDRenderer,
             )
             .use(front_matter_plugin)
-            .use(wordcount_plugin)
+            .use(word_count_plugin)
             .enable("front_matter")
             .enable("table")
         )
-        self._git_repository = GitHubRepository()
 
     def convert(
         self, notebook_path: Path, output_path: Path, assets_dir: Path | None = None
@@ -152,7 +152,7 @@ class NotebookToHugoMarkdownConverter:
         # Add all the attributes to render in the metadata
         new_metadata = {**markdown.metadata}
         new_metadata["title"] = self._extract_title(markdown)
-        new_metadata["google_colab_link"] = self._add_colab_link(notebook_path)
+        new_metadata["notebook_path"] = str(notebook_path.relative_to(MAIN_DIR))
         new_metadata["reading_time_min"] = markdown.env["wordcount"]["minutes"]
 
         # Render the frontmatter with python-frontmatter, so all the metadata is correctly formatted,
@@ -194,17 +194,6 @@ class NotebookToHugoMarkdownConverter:
             # If the current token is a heading, the next inline token will be the title
             use_next = token.type == "heading_open" and token.markup == "#"
         return None
-
-    def _add_colab_link(self, notebook_path: Path) -> str:
-        """
-        Add a link to open the notebook in Google Colab.
-        :param notebook_path: The path to the notebook file.
-        :return: The link to open the notebook in Google Colab.
-        """
-        repository_name = self._git_repository.repository_name()
-        current_branch = self._git_repository.current_branch_name()
-        relative_path = self._git_repository.relative_path(notebook_path)
-        return f"https://githubtocolab.com/{repository_name}/blob/{current_branch}/{relative_path}"
 
     def _process_assets(
         self,
@@ -320,7 +309,7 @@ class NotebookToHugoMarkdownConverter:
             asset_location = self._guess_file_extension(asset_location)
         elif parsed_link.scheme:
             # Download the remote asset and save it to the assets directory, then process as a local asset
-            response = requests.get(asset_link)
+            response = requests.get(asset_link, timeout=30)
             if not response.ok:
                 raise ParsingException(f"Failed to download asset {asset_link}.")
 
@@ -359,9 +348,9 @@ class NotebookToHugoMarkdownConverter:
             content=token.content,
         )
 
-        relative_web_url = notebook_path.stem / new_asset_location.relative_to(
-            assets_dir
-        )
+        relative_asset_location = new_asset_location.relative_to(MAIN_DIR)
+        # Relative web url does not contain the .dist/qdrant-landing/static prefix
+        relative_web_url = Path(*relative_asset_location.parts[3:])
         new_token.attrSet("src", str("documentation" / relative_web_url))
         return new_token
 
