@@ -351,7 +351,7 @@ class NotebookToHugoMarkdownConverter:
         relative_asset_location = new_asset_location.relative_to(MAIN_DIR)
         # Relative web url does not contain the .dist/qdrant-landing/static prefix
         relative_web_url = Path(*relative_asset_location.parts[3:])
-        new_token.attrSet("src", str("documentation" / relative_web_url))
+        new_token.attrSet("src", str(relative_web_url))
         return new_token
 
     def _guess_file_extension(self, path: Path) -> Path:

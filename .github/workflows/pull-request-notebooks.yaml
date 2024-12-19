@@ -60,7 +60,8 @@ jobs:
 
       - name: Copy converted notebooks to landing page
         run: |
-          cp --update=none -r examples/.dist/* landing_page/
+          # cp --update=none -r examples/.dist/* landing_page/
+          cp -r examples/.dist/* landing_page/
 
       - name: Commit changes to a new branch and start a PR
         env:
