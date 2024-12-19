@@ -1,4 +1,4 @@
-name: Pull request notebooks to landing page
+name: Pull Request notebooks to landing page
 
 on:
   pull_request:
