@@ -30,17 +30,22 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Checkout landing page repository
-        uses: actions/checkout@v4
+      - name: Get all changed markdown files
+        id: changed-jupyter-files
+        uses: tj-actions/changed-files@v45
         with:
-          repository: ${{ env.TARGET_REPO }}
-          path: 'landing_page'
-          token: ${{ secrets.API_TOKEN_GITHUB }}
+          files: |
+            **.ipynb
+            */**.ipynb
 
-      - name: Checkout the target branch of the landing page repository
+      - name: List all changed Jupyter files
+        if: steps.changed-jupyter-files.outputs.any_changed == 'true'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-jupyter-files.outputs.all_changed_files }}
         run: |
-          cd landing_page
-          git fetch origin $TARGET_BRANCH:$TARGET_BRANCH || git checkout -b $TARGET_BRANCH
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
 
       - name: Install poetry
         run: pipx install poetry
@@ -53,10 +58,23 @@ jobs:
           cd examples
           poetry install --with dev
 
+      # TODO: convert just the notebooks modified in this PR, not all of them
       - name: Convert notebooks
         run: |
           cd examples
           poetry run python .scripts/convert-all-notebooks-to-hugo-markdown.py
+
+      - name: Checkout landing page repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TARGET_REPO }}
+          path: 'landing_page'
+          token: ${{ secrets.API_TOKEN_GITHUB }}
+
+      - name: Checkout the target branch of the landing page repository
+        run: |
+          cd landing_page
+          git fetch origin $TARGET_BRANCH:$TARGET_BRANCH || git checkout -b $TARGET_BRANCH
 
       - name: Copy converted notebooks to landing page
         run: |

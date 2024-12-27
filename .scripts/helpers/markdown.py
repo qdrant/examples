@@ -1,10 +1,13 @@
 import base64
 import itertools
 import mimetypes
+import re
 import shutil
+import unicodedata
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Generator
 from urllib.parse import urlparse
 
 import frontmatter
@@ -36,6 +39,26 @@ class ParsedMarkdown:
     env: dict | None = field(default_factory=dict)
     resources: dict | None = field(default_factory=dict)
 
+    def iter_tokens(self) -> Generator[markdown_it.token.Token, None, None]:
+        """
+        Iterate over all the tokens in the document, including the frontmatter, if there is metadata.
+        :return: A generator of tokens.
+        """
+        if self.metadata:
+            post = frontmatter.Post("", **self.metadata)
+            doc_frontmatter = frontmatter.dumps(post).strip().strip("-").strip()
+            yield markdown_it.token.Token(
+                type="front_matter",
+                tag="",
+                nesting=0,
+                content=doc_frontmatter,
+                markup="---",
+                block=True,
+                hidden=True,
+            )
+        for token in self.tokens:
+            yield token
+
 
 class ParsingException(Exception):
     """
@@ -63,6 +86,30 @@ class NotebookToHugoMarkdownConverter:
             .enable("table")
         )
 
+    def normalize_filename(self, filename: str) -> str:
+        """
+        Normalize the filename to be compatible with the landing page conventions.
+        :param filename: The filename to normalize.
+        :return: The normalized filename.
+        """
+        normalized_filename = filename.lower()
+        normalized_filename = unicodedata.normalize("NFKD", normalized_filename)
+
+        # Normalize different kinds of hyphens
+        hyphens = ["-", "–", "—", "―"]
+        for hyphen in hyphens:
+            normalized_filename = normalized_filename.replace(hyphen, "-")
+
+        # Replace all whitespace and underscores with single hyphens
+        normalized_filename = re.sub(r"\s+", "-", normalized_filename)
+        normalized_filename = re.sub(r"_+", "-", normalized_filename)
+        normalized_filename = re.sub("-+", "-", normalized_filename)
+
+        # Remove all non-alphanumeric characters
+        normalized_filename = re.sub(r"[^a-z0-9-]", "", normalized_filename)
+
+        return normalized_filename
+
     def convert(
         self, notebook_path: Path, output_path: Path, assets_dir: Path | None = None
     ):
@@ -89,6 +136,7 @@ class NotebookToHugoMarkdownConverter:
 
         # Perform additional modifications so the Markdown is compatible with Hugo
         parsed_markdown = self._separate_code_blocks(parsed_markdown)
+        parsed_markdown = self._remove_empty_code_blocks(parsed_markdown)
 
         # Add the frontmatter to the Markdown content
         parsed_markdown = self._add_frontmatter(notebook_path, parsed_markdown)
@@ -102,10 +150,15 @@ class NotebookToHugoMarkdownConverter:
         # Render the finalized Markdown content to a file. The MDRenderer will take care of the formatting.
         with open(output_path, "w") as f:
             rendered_md = self._md.renderer.render(
-                parsed_markdown.tokens, self._md.options, parsed_markdown.env
+                list(parsed_markdown.iter_tokens()),
+                self._md.options,
+                parsed_markdown.env,
             )
             f.write(rendered_md)
         logger.info(f"Converted notebook to markdown: {output_path}")
+
+        # Generate the _index.md file, if it doesn't exist, so the new markdown file is included in the menu
+        self._write_index_file(output_path.parent)
 
     def _separate_code_blocks(self, markdown: ParsedMarkdown) -> ParsedMarkdown:
         """
@@ -140,6 +193,27 @@ class NotebookToHugoMarkdownConverter:
             markdown.resources,
         )
 
+    def _remove_empty_code_blocks(self, markdown: ParsedMarkdown) -> ParsedMarkdown:
+        """
+        Remove empty code blocks in the markdown. They tend to be put at the very end of the notebook, and do not look
+        good in the rendered markdown.
+        :param markdown: The parsed markdown content.
+        :return: The markdown content with the empty code blocks removed.
+        """
+        new_tokens = []
+        for token in markdown.tokens:
+            if token.type == "fence" and token.content.strip() == "":
+                continue
+            new_tokens.append(token)
+
+        return ParsedMarkdown(
+            markdown.raw_content,
+            new_tokens,
+            markdown.metadata,
+            markdown.env,
+            markdown.resources,
+        )
+
     def _add_frontmatter(
         self, notebook_path: Path, markdown: ParsedMarkdown
     ) -> ParsedMarkdown:
@@ -154,28 +228,9 @@ class NotebookToHugoMarkdownConverter:
         new_metadata["title"] = self._extract_title(markdown)
         new_metadata["notebook_path"] = str(notebook_path.relative_to(MAIN_DIR))
         new_metadata["reading_time_min"] = markdown.env["wordcount"]["minutes"]
-
-        # Render the frontmatter with python-frontmatter, so all the metadata is correctly formatted,
-        # including escaping special characters.
-        post = frontmatter.Post("", **new_metadata)
-        doc_frontmatter = frontmatter.dumps(post).strip().strip("-").strip()
-
-        # Build the new document with the frontmatter at the beginning
-        new_tokens = [
-            markdown_it.token.Token(
-                type="front_matter",
-                tag="",
-                nesting=0,
-                content=doc_frontmatter,
-                markup="---",
-                block=True,
-                hidden=True,
-            ),
-            *markdown.tokens,
-        ]
         return ParsedMarkdown(
             markdown.raw_content,
-            new_tokens,
+            markdown.tokens,
             new_metadata,
             markdown.env,
             markdown.resources,
@@ -351,7 +406,7 @@ class NotebookToHugoMarkdownConverter:
         relative_asset_location = new_asset_location.relative_to(MAIN_DIR)
         # Relative web url does not contain the .dist/qdrant-landing/static prefix
         relative_web_url = Path(*relative_asset_location.parts[3:])
-        new_token.attrSet("src", str(relative_web_url))
+        new_token.attrSet("src", f"/{relative_web_url}")
         return new_token
 
     def _guess_file_extension(self, path: Path) -> Path:
@@ -366,3 +421,28 @@ class NotebookToHugoMarkdownConverter:
         logger.debug(f"Guessed extension {file_extension} for {path}")
         path = path.rename(path.with_suffix(file_extension))
         return path
+
+    def _write_index_file(self, output_dir: Path):
+        """
+        Write the _index.md file to the output directory.
+        :param output_dir: The directory where the _index.md file should be saved.
+        """
+        index_file = output_dir / "_index.md"
+        if index_file.exists():
+            return
+
+        # Create a new index file and write it to the output directory
+        index_markdown = ParsedMarkdown(
+            "",
+            [],
+            metadata={
+                "title": output_dir.name,
+                "is_empty": False,
+                "partition": "qdrant",
+            },
+        )
+        with open(index_file, "w") as f:
+            rendered_md = self._md.renderer.render(
+                list(index_markdown.iter_tokens()), self._md.options, index_markdown.env
+            )
+            f.write(rendered_md)

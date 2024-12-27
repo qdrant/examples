@@ -6,6 +6,8 @@ from loguru import logger
 
 MAIN_DIR = Path(__file__).resolve().parent.parent
 
+# TODO: allow passing a list of notebooks to convert, not just all
+
 
 def main(
     overwrite: bool = False,
@@ -14,6 +16,9 @@ def main(
 
     for notebook_path in MAIN_DIR.glob("**/*.ipynb"):
         relative_notebook_dir = notebook_path.relative_to(MAIN_DIR).parent.parent
+
+        # Normalized filename is used to create the output file and it will be a part of the URL
+        new_filename = converter.normalize_filename(notebook_path.stem)
 
         # Output directory mimics the structure of the landing_page repo
         output_dir = (
@@ -25,7 +30,7 @@ def main(
             / str(relative_notebook_dir)
         )
         output_dir.mkdir(parents=True, exist_ok=True)
-        output_md_file = output_dir / f"{notebook_path.stem}.md"
+        output_md_file = output_dir / f"{new_filename}.md"
 
         # Assets are stored to mimic the landing_page repo structure as well
         assets_dir = (
@@ -35,7 +40,7 @@ def main(
             / "static"
             / "documentation"
             / str(relative_notebook_dir)
-            / notebook_path.stem
+            / new_filename
         )
         assets_dir.mkdir(parents=True, exist_ok=True)
 
