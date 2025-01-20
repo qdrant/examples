@@ -1,0 +1,8 @@
+crewai
+openai
+anthropic
+sentence-transformers
+qdrant-client
+pydantic
+streamlit
+python-dotenv
