@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "qdrant-examples"
+version = "1.0.0"
+description = "A collection of examples and tutorials for Qdrant vector search engine"
+authors = []
+license = "Apache-2.0"
+package-mode = false
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+jupyterlab = "^4.3.2"
+python-magic = "^0.4.27"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.4.10"
+pre-commit = "^3.7.1"
+typer = "^0.15.0"
+python-frontmatter = "^1.1.0"
+loguru = "^0.7.2"
+markdown-it-py = {extras = ["extras", "plugins"], version = "^3.0.0"}
+linkify-it-py = "^2.0.3"
+mdformat = "^0.7.19"
+mdformat-frontmatter = "^2.0.8"
+toml = "^0.10.2"
+mdformat-tables = "^1.0.0"
+
+[tool.ruff]
+lint.typing-modules = ["cibuildwheel.typing"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
