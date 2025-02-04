@@ -135,7 +135,7 @@ Console logs will provide detailed information on each step, including extractio
 
 ```
 .
-├── .env.local           # Environment variables configuration (not to be committed)
+├── .env.sample           # Environment variables configuration (change this to .env)
 ├── requirements.txt     # Python dependencies
 ├── graphrag.py       # Main Python script containing the pipeline code
 └── README.md            # Project documentation
