@@ -43,7 +43,7 @@ Before running any code, ensure you have the necessary API keys and database cre
 
 4. **Configure Environment Variables:**
 
-   Create a file named `.env` in the root of the repository and add your credentials:
+   Create a file named `.env` in the root of the repository and add your credentials. Refer to the .env.sample for guidance.:
 
    ```env
    # Qdrant configuration
