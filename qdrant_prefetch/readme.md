@@ -1,3 +1,3 @@
-# Example of use Qdrant's prefetch for hybrid queries
+# Examples of using Qdrant `prefetch` for hybrid queries
 
 * Prefetch as reranker
