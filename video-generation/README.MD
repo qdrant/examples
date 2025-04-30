@@ -49,7 +49,7 @@ Later...
 ```
 ## 🗂 Project Structure
 
-```markdwown 
+```markdown 
 root/
 ├── backend/    # Django REST Framework (DRF) project
 │   ├── Dockerfile
