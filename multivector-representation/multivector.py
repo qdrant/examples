@@ -2,13 +2,9 @@ from qdrant_client import QdrantClient, models
 from fastembed import TextEmbedding, LateInteractionTextEmbedding
 
 # 1. Connect to Qdrant server
-client = QdrantClient(host="localhost", port=6333)
+client = QdrantClient("http://localhost:6333")
 
-# 2. Load embedding models
-dense_model = TextEmbedding("BAAI/bge-small-en")  # Any dense model
-colbert_model = LateInteractionTextEmbedding("colbert-ir/colbertv2.0")  # Late interaction
-
-# 3. Example documents and query
+# 2. Example documents and query
 documents = [
     "Artificial intelligence is used in hospitals for cancer diagnosis and treatment.",
     "Self-driving cars use AI to detect obstacles and make driving decisions.",
@@ -16,15 +12,23 @@ documents = [
 ]
 query_text = "How does AI help in medicine?"
 
-# 4. Generate embeddings
-dense_doc_vectors = list(dense_model.embed(documents))
-dense_query_vector = list(dense_model.embed([query_text]))[0]
+# 3. Generate embeddings
 
-colbert_doc_vectors = list(colbert_model.embed(documents))
-colbert_query_vector = list(colbert_model.embed([query_text]))[0]
+dense_doc_vectors = [
+    models.Document(text=doc, model="BAAI/bge-small-en")
+    for doc in documents
+]
+dense_query_vector = models.Document(text=query_text, model="BAAI/bge-small-en")
 
-# 5. Create collection with dense + multivector configuration
-collection_name = "dense_multivector_search"
+colbert_doc_vectors = [
+    models.Document(text=doc, model="colbert-ir/colbertv2.0")
+    for doc in documents
+]
+colbert_query_vector = models.Document(text=query_text, model="colbert-ir/colbertv2.0")
+
+
+# 4. Create collection with dense + multivector configuration
+collection_name = "hybrid_dense_multivector_search"
 client.create_collection(
     collection_name=collection_name,
     vectors_config={
@@ -44,7 +48,7 @@ client.create_collection(
     }
 )
 
-# 6. Upload documents with both dense and multivector embeddings
+# 5. Upload documents with both dense and multivector embeddings
 points = [
     models.PointStruct(
         id=i,
@@ -58,7 +62,7 @@ points = [
 ]
 client.upsert(collection_name=collection_name, points=points)
 
-# 7. Search using dense vector (prefetch), then rerank with multivector in one query
+# 6. Search using dense vector (prefetch), then rerank with multivector in one query
 results = client.query_points(
     collection_name=collection_name,
     prefetch=models.Prefetch(
@@ -72,8 +76,9 @@ results = client.query_points(
     with_payload=True
 )
 
-# 8. Display final reranked results
+# 7. Display final reranked results
 print(results)
 """
 points=[ScoredPoint(id=1, version=0, score=5.0332537, payload={'text': 'Self-driving cars use AI to detect obstacles and make driving decisions.'}, vector=None, shard_key=None, order_value=None), ScoredPoint(id=2, version=0, score=4.7417374, payload={'text': 'AI is transforming customer service through chatbots and automation.'}, vector=None, shard_key=None, order_value=None), ScoredPoint(id=0, version=0, score=4.727172, payload={'text': 'Artificial intelligence is used in hospitals for cancer diagnosis and treatment.'}, vector=None, shard_key=None, order_value=None)]
+(.env) derrickmwiti@Derricks-MacBook-Pro multivectors % 
 """
