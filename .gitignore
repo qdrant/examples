@@ -11,3 +11,4 @@ qdrant_101_image_data/image_search_app.py
 */.env
 .venv/
 .DS_Store
+
