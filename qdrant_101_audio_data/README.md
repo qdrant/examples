@@ -1,6 +1,6 @@
 # Qdrant & Audio Data
 
-![main](../images/main_pic.png)
+![main](./img/main_pic.png)
 
 Welcome to this tutorial on vector databases and music recommendation systems using Python and Qdrant. Here, 
 we will learn about how to get started with audio data, embeddings and vector databases.
