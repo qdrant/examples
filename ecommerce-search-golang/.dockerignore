@@ -1,0 +1,33 @@
+# Dependencies
+frontend/node_modules
+
+# Build outputs
+frontend/.next
+frontend/out
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files (will be passed at runtime)
+.env
+.env.*
+!.env.example
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+
+# Misc
+README.md
+*.md
