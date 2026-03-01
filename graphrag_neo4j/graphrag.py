@@ -1,12 +1,12 @@
-from neo4j import GraphDatabase
-from qdrant_client import QdrantClient, models
-from dotenv import load_dotenv
-from pydantic import BaseModel
-from openai import OpenAI
-from collections import defaultdict
-from neo4j_graphrag.retrievers import QdrantNeo4jRetriever
-import uuid
 import os
+import uuid
+
+from custom_qdrant_neo4j_retriever import CustomQdrantNeo4jRetriever
+from dotenv import load_dotenv
+from neo4j import GraphDatabase
+from openai import OpenAI
+from pydantic import BaseModel
+from qdrant_client import QdrantClient, models
 
 # Load environment variables
 load_dotenv()
@@ -71,62 +71,70 @@ def openai_llm_parser(prompt):
     
     return GraphComponents.model_validate_json(completion.choices[0].message.content)
     
-def extract_graph_components(raw_data):
-    prompt = f"Extract nodes and relationships from the following text:\n{raw_data}"
+def extract_graph_components(chunks):
+    nodes_list = []
+    relationships_list = []
+    for chunk in chunks:
+        prompt = f"Extract nodes and relationships from the following text:\n{chunk}"
 
-    parsed_response = openai_llm_parser(prompt)  # Assuming this returns a list of dictionaries
-    parsed_response = parsed_response.graph  # Assuming the 'graph' structure is a key in the parsed response
+        parsed_response = openai_llm_parser(prompt)  # Assuming this returns a list of dictionaries
+        parsed_response = parsed_response.graph  # Assuming the 'graph' structure is a key in the parsed response
 
-    nodes = {}
-    relationships = []
+        nodes = {}
+        relationships = []
 
-    for entry in parsed_response:
-        node = entry.node
-        target_node = entry.target_node  # Get target node if available
-        relationship = entry.relationship  # Get relationship if available
+        for entry in parsed_response:
+            node = entry.node
+            target_node = entry.target_node  # Get target node if available
+            relationship = entry.relationship  # Get relationship if available
 
-        # Add nodes to the dictionary with a unique ID
-        if node not in nodes:
-            nodes[node] = str(uuid.uuid4())
+            # Add nodes to the dictionary with a unique ID
+            if node not in nodes:
+                nodes[node] = str(uuid.uuid4())
 
-        if target_node and target_node not in nodes:
-            nodes[target_node] = str(uuid.uuid4())
+            if target_node and target_node not in nodes:
+                nodes[target_node] = str(uuid.uuid4())
 
-        # Add relationship to the relationships list with node IDs
-        if target_node and relationship:
-            relationships.append({
-                "source": nodes[node],
-                "target": nodes[target_node],
-                "type": relationship
-            })
+            # Add relationship to the relationships list with node IDs
+            if target_node and relationship:
+                relationships.append({
+                    "source": nodes[node],
+                    "target": nodes[target_node],
+                    "type": relationship
+                })
+        
+        nodes_list.append(nodes)
+        relationships_list.append(relationships)
 
-    return nodes, relationships
+    return nodes_list, relationships_list
 
-def ingest_to_neo4j(nodes, relationships):
+def ingest_to_neo4j(nodes_list, relationships_list):
     """
     Ingest nodes and relationships into Neo4j.
     """
 
     with neo4j_driver.session() as session:
         # Create nodes in Neo4j
-        for name, node_id in nodes.items():
-            session.run(
-                "CREATE (n:Entity {id: $id, name: $name})",
-                id=node_id,
-                name=name
-            )
+        for nodes in nodes_list:
+            for name, node_id in nodes.items():
+                session.run(
+                    "CREATE (n:Entity {id: $id, name: $name})",
+                    id=node_id,
+                    name=name
+                )
 
         # Create relationships in Neo4j
-        for relationship in relationships:
-            session.run(
-                "MATCH (a:Entity {id: $source_id}), (b:Entity {id: $target_id}) "
-                "CREATE (a)-[:RELATIONSHIP {type: $type}]->(b)",
-                source_id=relationship["source"],
-                target_id=relationship["target"],
-                type=relationship["type"]
+        for relationships in relationships_list:
+            for relationship in relationships:
+                session.run(
+                    "MATCH (a:Entity {id: $source_id}), (b:Entity {id: $target_id}) "
+                    "CREATE (a)-[:RELATIONSHIP {type: $type}]->(b)",
+                    source_id=relationship["source"],
+                    target_id=relationship["target"],
+                    type=relationship["type"]
             )
 
-    return nodes
+    return nodes_list
 
 def create_collection(client, collection_name, vector_dimension):
   # Try to fetch the collection status
@@ -155,8 +163,8 @@ def openai_embeddings(text):
     
     return response.data[0].embedding
 
-def ingest_to_qdrant(collection_name, raw_data, node_id_mapping):
-    embeddings = [openai_embeddings(paragraph) for paragraph in raw_data.split("\n")]
+def ingest_to_qdrant(collection_name, chunks, node_id_mapping_list):
+    embeddings = [openai_embeddings(chunk) for chunk in chunks]
 
     qdrant_client.upsert(
         collection_name=collection_name,
@@ -164,14 +172,14 @@ def ingest_to_qdrant(collection_name, raw_data, node_id_mapping):
             {
                 "id": str(uuid.uuid4()),
                 "vector": embedding,
-                "payload": {"id": node_id}
+                "payload": {"id": list(node_id_mapping.values())}
             }
-            for node_id, embedding in zip(node_id_mapping.values(), embeddings)
+            for node_id_mapping, embedding in zip(node_id_mapping_list, embeddings)
         ]
     )
 
 def retriever_search(neo4j_driver, qdrant_client, collection_name, query):
-    retriever = QdrantNeo4jRetriever(
+    retriever = CustomQdrantNeo4jRetriever(
         driver=neo4j_driver,
         client=qdrant_client,
         collection_name=collection_name,
@@ -302,16 +310,18 @@ if __name__ == "__main__":
     Carol's team grew significantly after moving to New York.
     Seattle remains the technology hub for TechCorp."""
 
-    nodes, relationships = extract_graph_components(raw_data)
-    print("Nodes:", nodes)
-    print("Relationships:", relationships)
+    chunks = raw_data.split("\n")
+
+    nodes_list, relationships_list = extract_graph_components(chunks)
+    print("Nodes:", nodes_list)
+    print("Relationships:", relationships_list)
     
     print("Ingesting to Neo4j...")
-    node_id_mapping = ingest_to_neo4j(nodes, relationships)
+    node_id_mapping_list = ingest_to_neo4j(nodes_list, relationships_list)
     print("Neo4j ingestion complete")
     
     print("Ingesting to Qdrant...")
-    ingest_to_qdrant(collection_name, raw_data, node_id_mapping)
+    ingest_to_qdrant(collection_name, chunks, node_id_mapping_list)
     print("Qdrant ingestion complete")
 
     query = "How is Bob connected to New York?"
