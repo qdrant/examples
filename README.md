@@ -15,4 +15,5 @@ This repo contains a collection of tutorials, demos, and how-to guides on how to
 | [Step-back prompting in Langchain RAG](./langchain-qdrant-step-back-prompting)            | Step-back prompting for RAG, implemented in Langchain                                      | OpenAI, Qdrant, Cohere, Langchain                                            |
 | [Collaborative Filtering and MovieLens](./sparse-vectors-movies-reco)                     | A notebook demonstrating how to build a collaborative filtering system using Qdrant        | Sparse Vectors, Qdrant                                                       |
 | [Use semantic search to navigate your codebase](./code-search/)                           | Implement semantic search application for code search task                                 | Qdrant, Python, sentence-transformers, Jina                                  |
+| [Agentic-langGraph-RAG Tutorial](./Agentic-langGraph-RAG/Agentic_PDF_RAG.ipynb)           | Tutorial for Agentic RAG using LangGraph and Qdrant                                        | LangGraph, Qdrant, GPT-4o, RAG                                                   |
 
