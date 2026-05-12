@@ -1,5 +1,8 @@
 """Try candidate queries against the multi-representation collection and print
-all 5 step outputs side-by-side so we can pick the one with the best narrative arc."""
+all 6 step outputs side-by-side so we can pick the one with the best narrative arc.
+
+Local dev script: uses FastEmbed for both dense and sparse, against a local Qdrant.
+The notebook uses Qdrant Cloud Inference instead, but the schema names match."""
 
 from qdrant_client import QdrantClient, models
 from fastembed import TextEmbedding, SparseTextEmbedding
@@ -31,7 +34,7 @@ def step2(q, k=5):
         COLLECTION,
         prefetch=[
             models.Prefetch(query=d, using="dense_chunk", limit=50),
-            models.Prefetch(query=s, using="sparse_keywords", limit=50),
+            models.Prefetch(query=s, using="sparse_title", limit=50),
         ],
         query=models.FusionQuery(fusion=models.Fusion.RRF),
         limit=k,
@@ -45,7 +48,7 @@ def step3(q, k=5):
         prefetch=[
             models.Prefetch(query=d, using="dense_chunk", limit=50),
             models.Prefetch(query=d, using="dense_title", limit=50),
-            models.Prefetch(query=s, using="sparse_keywords", limit=50),
+            models.Prefetch(query=s, using="sparse_title", limit=50),
         ],
         query=models.FusionQuery(fusion=models.Fusion.RRF),
         limit=k,
@@ -54,12 +57,28 @@ def step3(q, k=5):
 
 def step4(q, k=5):
     d, s = embed(q)
+    return client.query_points(
+        COLLECTION,
+        prefetch=[
+            models.Prefetch(query=d, using="dense_chunk",    limit=50),
+            models.Prefetch(query=d, using="dense_title",    limit=50),
+            models.Prefetch(query=d, using="dense_abstract", limit=50),
+            models.Prefetch(query=s, using="sparse_title",   limit=50),
+        ],
+        query=models.FusionQuery(fusion=models.Fusion.RRF),
+        limit=k,
+    ).points
+
+
+def step5(q, k=5):
+    d, s = embed(q)
     return client.query_points_groups(
         COLLECTION,
         prefetch=[
-            models.Prefetch(query=d, using="dense_chunk", limit=100),
-            models.Prefetch(query=d, using="dense_title", limit=100),
-            models.Prefetch(query=s, using="sparse_keywords", limit=100),
+            models.Prefetch(query=d, using="dense_chunk",    limit=100),
+            models.Prefetch(query=d, using="dense_title",    limit=100),
+            models.Prefetch(query=d, using="dense_abstract", limit=100),
+            models.Prefetch(query=s, using="sparse_title",   limit=100),
         ],
         query=models.FusionQuery(fusion=models.Fusion.RRF),
         group_by="document_id",
@@ -68,22 +87,24 @@ def step4(q, k=5):
     ).groups
 
 
-def step5(q, k=5):
+def step6(q, k=5):
     d, s = embed(q)
     return client.query_points_groups(
         COLLECTION,
         prefetch=[
-            models.Prefetch(query=d, using="dense_chunk", limit=100),
-            models.Prefetch(query=d, using="dense_title", limit=100),
-            models.Prefetch(query=s, using="sparse_keywords", limit=100),
+            models.Prefetch(query=d, using="dense_chunk",    limit=100),
+            models.Prefetch(query=d, using="dense_title",    limit=100),
+            models.Prefetch(query=d, using="dense_abstract", limit=100),
+            models.Prefetch(query=s, using="sparse_title",   limit=100),
         ],
         query=models.FormulaQuery(
             formula=models.SumExpression(sum=[
                 "$score[0]",
                 models.MultExpression(mult=[0.5, "$score[1]"]),
-                models.MultExpression(mult=[0.3, "$score[2]"]),
+                models.MultExpression(mult=[0.4, "$score[2]"]),
+                models.MultExpression(mult=[0.3, "$score[3]"]),
             ]),
-            defaults={"$score[1]": 0.0, "$score[2]": 0.0},
+            defaults={"$score[1]": 0.0, "$score[2]": 0.0, "$score[3]": 0.0},
         ),
         group_by="document_id",
         group_size=3,
@@ -103,11 +124,12 @@ def doc_id_of(item):
 
 def run_query(q):
     print(f"\n{'=' * 100}\nQUERY: {q!r}\n{'=' * 100}")
-    for name, fn in [("step1 dense-only", step1),
-                     ("step2 +sparse RRF", step2),
-                     ("step3 +title RRF", step3),
-                     ("step4 grouped   ", step4),
-                     ("step5 formula   ", step5)]:
+    for name, fn in [("step1 dense-only   ", step1),
+                     ("step2 +sparse RRF  ", step2),
+                     ("step3 +title RRF   ", step3),
+                     ("step4 +abstract RRF", step4),
+                     ("step5 grouped      ", step5),
+                     ("step6 formula      ", step6)]:
         results = fn(q, k=5)
         seen = set()
         dup_count = 0
