@@ -16,4 +16,4 @@ This repo contains a collection of tutorials, demos, and how-to guides on how to
 | [Collaborative Filtering and MovieLens](./sparse-vectors-movies-reco)                     | A notebook demonstrating how to build a collaborative filtering system using Qdrant        | Sparse Vectors, Qdrant                                                       |
 | [Use semantic search to navigate your codebase](./code-search/)                           | Implement semantic search application for code search task                                 | Qdrant, Python, sentence-transformers, Jina                                  |
 
-| [Incremental Embedding Updates](./temporal-data-drift)                                   | Sync embeddings with changing raw text data                                                | Qdrant Cloud Inference, Python                                               |
+| [Incremental Embedding Updates](./temporal-data-drift)                                   | Sync embeddings with changing text: a simple pipeline (Part 1) and a bucket-digest version that scales with change (Part 2) | Qdrant Cloud Inference, Python                                               |
