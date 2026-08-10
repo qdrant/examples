@@ -1,0 +1,8 @@
+boto3
+langchain-community
+langchain
+python-dotenv
+unstructured
+unstructured[pdf]
+langchain-experimental
+qdrant_client
