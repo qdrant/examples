@@ -12,3 +12,4 @@ qdrant_101_image_data/image_search_app.py
 .venv/
 */.DS_Store
 
+.claude/
