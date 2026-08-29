@@ -1,0 +1,13 @@
+fastapi>=0.115.0
+fastembed>=0.4.0
+uvicorn[standard]>=0.30.0
+asyncpg>=0.29.0
+qdrant-client>=1.14.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+datasets>=2.14.0
+python-dotenv>=1.0.0
+httpx>=0.27.0
+
+# tier 3 only
+confluent-kafka>=2.3.0
