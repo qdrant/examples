@@ -7,6 +7,7 @@ data
 qdrant_101_image_data/vectors.npy
 qdrant_101_image_data/image_search_app.py
 *.json
+!ai-getting-started/menu-items.json
 */*.log
 */.env
 .venv/
