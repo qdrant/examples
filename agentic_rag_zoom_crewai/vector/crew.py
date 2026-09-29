@@ -1,11 +1,10 @@
 import sys
 import os
-from crewai import Agent, Task, Crew
+from crewai import Agent, Task, Crew, LLM
 from crewai.tools import BaseTool
 from typing import Type, List, Dict
 from pydantic import BaseModel, Field
 from qdrant_client import QdrantClient
-from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 import anthropic
 from datetime import datetime
@@ -16,15 +15,16 @@ from pathlib import Path
 env_path = Path(__file__).parent.parent / '.env.local'
 load_dotenv(env_path)
 
-# Set API keys from environment
-ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
+# Claude model used by the CrewAI agents and by the analysis tool.
+# The Anthropic SDK and CrewAI both read ANTHROPIC_API_KEY from the environment.
+CLAUDE_MODEL = "claude-sonnet-5"
 
 # Initialize clients
 qdrant_client = QdrantClient(
     url=os.getenv('QDRANT_URL'),
     api_key=os.getenv('QDRANT_API_KEY')
 )
-openai_client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
+# Same model that data_loader.py uses to embed the meetings
 embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Define tool input schemas
@@ -59,19 +59,14 @@ class SearchMeetingsTool(BaseTool):
     args_schema: Type[BaseModel] = SearchInput
 
     def _run(self, query: str) -> List[Dict]:
-        # Use OpenAI embeddings to match data_loader.py
-        response = openai_client.embeddings.create(
-            model="text-embedding-ada-002",
-            input=query
-        )
-        query_vector = response.data[0].embedding
+        # Embed the query with the same model used at ingestion time
+        query_vector = embedding_model.encode(query).tolist()
         
-        search_results = qdrant_client.search(
+        search_results = qdrant_client.query_points(
             collection_name='zoom_recordings',
-            query_vector=query_vector,
+            query=query_vector,
             limit=10,
-            score_threshold=0.7
-        )
+        ).points
         
         return [
             {
@@ -90,12 +85,14 @@ class MeetingAnalysisTool(BaseTool):
     args_schema: Type[BaseModel] = AnalysisInput
 
     def _run(self, meeting_data: dict) -> Dict:
-        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+        client = anthropic.Anthropic()
         
-        # Check if we received a list of meetings in the meetings key
-        meetings = meeting_data.get('meetings', [])
-        if not isinstance(meetings, list):
-            meetings = [meeting_data]  # Convert single meeting to list
+        # Accept either {"meetings": [...]} or a single meeting dict
+        meetings = meeting_data.get('meetings')
+        if meetings is None:
+            meetings = [meeting_data]
+        elif not isinstance(meetings, list):
+            meetings = [meetings]
             
         # Format all meetings for analysis
         meetings_text = "\n\n".join([
@@ -121,15 +118,17 @@ class MeetingAnalysisTool(BaseTool):
         """
         
         message = client.messages.create(
-            model="claude-3-sonnet-20240229",
-            max_tokens=1000,
-            temperature=0,
+            model=CLAUDE_MODEL,
+            max_tokens=4096,
             messages=[{"role": "user", "content": prompt}]
+        )
+        analysis = "".join(
+            block.text for block in message.content if block.type == "text"
         )
         
         return {
             "meetings_analyzed": len(meetings),
-            "analysis": message.content,
+            "analysis": analysis,
             "timestamp": datetime.now().isoformat()
         }
 
@@ -139,6 +138,9 @@ def get_crew_response(query: str) -> str:
     searcher = SearchMeetingsTool()
     analyzer = MeetingAnalysisTool()
     
+    # Both agents run on Claude
+    llm = LLM(model=f"anthropic/{CLAUDE_MODEL}", max_tokens=4096)
+    
     # Create agents
     researcher = Agent(
         role='Research Assistant',
@@ -147,6 +149,7 @@ def get_crew_response(query: str) -> str:
                   You know when to use calculations, when to search meetings,
                   and when to perform detailed analysis.""",
         tools=[calculator, searcher, analyzer],
+        llm=llm,
         verbose=True
     )
     
@@ -155,6 +158,7 @@ def get_crew_response(query: str) -> str:
         goal='Create comprehensive and clear responses',
         backstory="""You excel at taking raw information and analysis
                   and creating clear, actionable insights.""",
+        llm=llm,
         verbose=True
     )
     

@@ -43,9 +43,8 @@ Before running any code, complete these prerequisite steps:
    - Create a new cluster
    - Get the cluster URL from the cluster details page
    - Go to "Data Access Control" tab and create an API key
-   Get API credentials for Anthropic and OpenAI
-   - Get an API key from [Anthropic](https://www.anthropic.com/)
-   - Get an API key from [OpenAI](https://platform.openai.com/)
+   Get an API key for Claude, which powers both the CrewAI agents and the analysis tool:
+   - Get an API key from the [Anthropic Console](https://console.anthropic.com/)
 
 2. Clone the repository:
 
@@ -62,7 +61,7 @@ cd examples/agentic_rag_zoom_crewai/
 4. Create and activate a Python virtual environment:
 
 ```bash
-python3.10 -m venv venv
+python3 -m venv venv  # Python 3.10 to 3.13
 source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
@@ -75,7 +74,6 @@ pip install -r requirements.txt
 5. Configure environment variables in `.env.local`:
 
 ```text
-OPENAI_API_KEY=your_openai_key_here
 ANTHROPIC_API_KEY=your_anthropic_key_here
 QDRANT_URL=your_qdrant_url_here
 QDRANT_API_KEY=your_qdrant_api_key_here

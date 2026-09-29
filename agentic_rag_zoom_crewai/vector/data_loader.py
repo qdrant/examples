@@ -9,14 +9,15 @@ from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 import uuid
 import base64
-from openai import OpenAI
 
 # Load environment variables
 env_path = Path(__file__).parent.parent / '.env.local'
 load_dotenv(env_path)
 
-# Set OpenAI key explicitly in environment with correct name
-os.environ['OPENAI_API_KEY'] = os.getenv('openai_api_key')
+# One embedding model for both ingestion and queries. The collection is
+# created with this model's vector size, so queries must use the same model.
+EMBEDDING_MODEL_NAME = 'all-MiniLM-L6-v2'
+EMBEDDING_DIM = 384
 
 class MeetingData:
     _instance = None
@@ -39,11 +40,10 @@ class MeetingData:
         
         # Initialize clients
         self.qdrant_client = QdrantClient(
-            url=os.getenv('qdrantUrl'),
-            api_key=os.getenv('qdrantApiKey')
+            url=os.getenv('QDRANT_URL'),
+            api_key=os.getenv('QDRANT_API_KEY')
         )
-        self.openai_client = OpenAI()
-        self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
         
         # Ensure collection exists and is populated
         self._ensure_collection_exists()
@@ -69,10 +69,10 @@ class MeetingData:
             print("LOG: Collection 'zoom_recordings' already exists")
         except Exception:
             print("LOG: Creating collection 'zoom_recordings'...")
-            self.qdrant_client.recreate_collection(
+            self.qdrant_client.create_collection(
                 collection_name='zoom_recordings',
                 vectors_config=models.VectorParams(
-                    size=384,  # SentenceTransformer dimension
+                    size=EMBEDDING_DIM,  # all-MiniLM-L6-v2 output size
                     distance=models.Distance.COSINE
                 )
             )
@@ -102,7 +102,7 @@ class MeetingData:
                 Summary: {json.dumps(meeting.get('summary', {}))}
                 """
                 
-                # Get embedding from SentenceTransformer instead of OpenAI
+                # Embed with the same model used for queries
                 vector = self.embedding_model.encode(text_to_embed).tolist()
                 
                 # Create point ID from meeting UUID if available
@@ -173,7 +173,7 @@ class MeetingData:
         """Check if meetings are properly indexed in Qdrant."""
         try:
             # Get collection info
-            print(f"LOG: Connecting to Qdrant at: {os.getenv('qdrantUrl')}")
+            print(f"LOG: Connecting to Qdrant at: {os.getenv('QDRANT_URL')}")
             collection_info = self.qdrant_client.get_collection('zoom_recordings')
             points_count = collection_info.points_count
             
@@ -204,22 +204,17 @@ class MeetingData:
             return self.meetings
 
         try:
-            # Get embedding from OpenAI
-            print("LOG: Getting OpenAI embedding for query")
-            response = self.openai_client.embeddings.create(
-                model="text-embedding-ada-002",
-                input=query
-            )
-            query_vector = response.data[0].embedding
+            # Embed the query with the same model used at ingestion time
+            print("LOG: Embedding query with SentenceTransformer")
+            query_vector = self.embedding_model.encode(query).tolist()
             
-            # Search Qdrant with limit of 10
+            # Search Qdrant
             print("LOG: Searching Qdrant")
-            vector_results = self.qdrant_client.search(
+            vector_results = self.qdrant_client.query_points(
                 collection_name='zoom_recordings',
-                query_vector=query_vector,
-                limit=10,  # Changed from default to 10
-                score_threshold=0.7  # Only return good matches
-            )
+                query=query_vector,
+                limit=limit,
+            ).points
             
             if vector_results:
                 print(f"LOG: Found {len(vector_results)} matches in Qdrant")

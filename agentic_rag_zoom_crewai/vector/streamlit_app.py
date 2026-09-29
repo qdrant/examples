@@ -198,9 +198,8 @@ with tab2:
     Technologies used:
     - CrewAI for agent orchestration
     - Qdrant for vector search
-    - OpenAI for embeddings
-    - Anthropic's Claude for analysis
-    - Sentence Transformers for encoding
+    - Sentence Transformers for embeddings
+    - Anthropic's Claude for the agents and analysis
     """)
 
 # Add a sidebar with additional controls if needed

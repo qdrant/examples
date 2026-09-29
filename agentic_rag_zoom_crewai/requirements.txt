@@ -1,5 +1,4 @@
 crewai
-openai
 anthropic
 sentence-transformers
 qdrant-client

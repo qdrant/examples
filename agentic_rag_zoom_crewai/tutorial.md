@@ -31,8 +31,7 @@ In this hands-on tutorial, we'll create a system that:
    - Go to **Data Access Control** and generate an **API key**.
 
 2. **Get API Credentials for AI Services**:
-   - Get an API key from [Anthropic](https://www.anthropic.com/)
-   - Get an API key from [OpenAI](https://platform.openai.com/)
+   - Get an API key from the [Anthropic Console](https://console.anthropic.com/). Claude powers both the CrewAI agents and the analysis tool.
 
 ---
 
@@ -63,7 +62,6 @@ pip install -r requirements.txt
 Create a `.env.local` file with:
 
 ```text
-OPENAI_API_KEY=your_openai_key_here
 ANTHROPIC_API_KEY=your_anthropic_key_here
 QDRANT_URL=your_qdrant_url_here
 QDRANT_API_KEY=your_qdrant_api_key_here
@@ -99,7 +97,7 @@ Our system combines vector search with AI agents to create a powerful meeting an
 
 1. **Data Processing Pipeline**  
    - Processes meeting transcripts and metadata
-   - Creates embeddings with SentenceTransformer
+   - Creates embeddings with SentenceTransformer (`all-MiniLM-L6-v2`), the same model used for queries
    - Manages Qdrant collection and data upload
 
 2. **AI Agent System**  
@@ -119,6 +117,9 @@ Our system combines vector search with AI agents to create a powerful meeting an
 At the heart of our system is the data processing pipeline. We use a singleton pattern to ensure efficient resource usage:
 
 ```python
+EMBEDDING_MODEL_NAME = 'all-MiniLM-L6-v2'
+EMBEDDING_DIM = 384
+
 class MeetingData:
     def _initialize(self):
         self.data_dir = Path(__file__).parent.parent / 'data'
@@ -128,8 +129,10 @@ class MeetingData:
             url=os.getenv('QDRANT_URL'),
             api_key=os.getenv('QDRANT_API_KEY')
         )
-        self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
 ```
+
+The `zoom_recordings` collection is created with `size=EMBEDDING_DIM`, so every vector written to it or searched against it must come from this model.
 
 When processing meetings, we need to consider both the content and context. Each meeting gets converted into a rich text representation before being transformed into a vector:
 
@@ -169,54 +172,63 @@ class CalculatorTool(BaseTool):
         }
 ```
 
-But the real power comes from our vector search integration. This tool converts natural language queries into vector representations and searches our meeting database:
+But the real power comes from our vector search integration. This tool embeds the natural language query with the same `all-MiniLM-L6-v2` model that indexed the meetings and searches our meeting database. Using one model for both ingestion and queries matters: vectors from different models live in different spaces and have different sizes, so a query embedded with another model would either fail with a dimension error or return meaningless matches.
 
 ```python
+embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+
 class SearchMeetingsTool(BaseTool):
     def _run(self, query: str) -> List[Dict]:
-        response = openai_client.embeddings.create(
-            model="text-embedding-ada-002",
-            input=query
-        )
-        query_vector = response.data[0].embedding
+        query_vector = embedding_model.encode(query).tolist()
         
-        return self.qdrant_client.search(
+        return qdrant_client.query_points(
             collection_name='zoom_recordings',
-            query_vector=query_vector,
-            limit=10
-        )
+            query=query_vector,
+            limit=10,
+        ).points
 ```
 
-The search results then feed into our analysis tool, which uses Claude to provide deeper insights:
+The search results then feed into our analysis tool, which uses Claude to provide deeper insights. The example uses `claude-sonnet-5`. The Anthropic SDK reads `ANTHROPIC_API_KEY` from the environment, and the response text is collected from the message's text blocks:
 
 ```python
+CLAUDE_MODEL = "claude-sonnet-5"
+
 class MeetingAnalysisTool(BaseTool):
     def _run(self, meeting_data: dict) -> Dict:
+        client = anthropic.Anthropic()
         meetings_text = self._format_meetings(meeting_data)
         
         message = client.messages.create(
-            model="claude-3-sonnet-20240229",
+            model=CLAUDE_MODEL,
+            max_tokens=4096,
             messages=[{
                 "role": "user", 
                 "content": f"Analyze these meetings:\n\n{meetings_text}"
             }]
         )
+        analysis = "".join(
+            block.text for block in message.content if block.type == "text"
+        )
 ```
 
 ### Orchestrating the Workflow
 
-The magic happens when we bring these tools together under our agent framework. We create two specialized agents:
+The magic happens when we bring these tools together under our agent framework. Both agents run on the same Claude model through CrewAI's `LLM` class. We create two specialized agents:
 
 ```python
+llm = LLM(model=f"anthropic/{CLAUDE_MODEL}", max_tokens=4096)
+
 researcher = Agent(
     role='Research Assistant',
     goal='Find and analyze relevant information',
-    tools=[calculator, searcher, analyzer]
+    tools=[calculator, searcher, analyzer],
+    llm=llm
 )
 
 synthesizer = Agent(
     role='Information Synthesizer',
-    goal='Create comprehensive and clear responses'
+    goal='Create comprehensive and clear responses',
+    llm=llm
 )
 ```
 
