@@ -195,7 +195,7 @@ class MeetingAnalysisTool(BaseTool):
         meetings_text = self._format_meetings(meeting_data)
         
         message = client.messages.create(
-            model="claude-3-sonnet-20240229",
+            model="claude-sonnet-5-5",
             messages=[{
                 "role": "user", 
                 "content": f"Analyze these meetings:\n\n{meetings_text}"
