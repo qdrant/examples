@@ -1,0 +1,182 @@
+[
+  {
+    "name": "Pad Thai with Tofu",
+    "description": "Stir-fried rice noodles with tofu bean sprouts scallions and crushed peanuts in traditional tamarind sauce",
+    "price": "$13.95",
+    "category": "Noodles"
+  },
+  {
+    "name": "Grilled Salmon Fillet",
+    "description": "Wild-caught Atlantic salmon grilled with lemon butter and fresh herbs served with seasonal vegetables",
+    "price": "$24.50",
+    "category": "Seafood Entrees"
+  },
+  {
+    "name": "Mushroom Risotto",
+    "description": "Creamy arborio rice with mixed mushrooms parmesan truffle oil and fresh thyme",
+    "price": "$16.75",
+    "category": "Vegetarian"
+  },
+  {
+    "name": "Bibimbap Bowl",
+    "description": "Korean rice bowl with seasoned vegetables fried egg gochujang sauce and choice of protein",
+    "price": "$14.50",
+    "category": "Korean Bowls"
+  },
+  {
+    "name": "Falafel Wrap",
+    "description": "Crispy chickpea fritters with hummus tahini cucumber tomato and pickled vegetables in warm pita",
+    "price": "$11.25",
+    "category": "Mediterranean"
+  },
+  {
+    "name": "Shrimp Tacos",
+    "description": "Three soft tacos with grilled shrimp cabbage slaw chipotle aioli and fresh lime",
+    "price": "$13.00",
+    "category": "Tacos"
+  },
+  {
+    "name": "Vegetable Curry",
+    "description": "Mixed vegetables in aromatic coconut curry sauce with jasmine rice and naan bread",
+    "price": "$12.95",
+    "category": "Indian Curries"
+  },
+  {
+    "name": "Tuna Poke Bowl",
+    "description": "Fresh ahi tuna with avocado edamame cucumber seaweed salad over sushi rice with spicy mayo",
+    "price": "$16.50",
+    "category": "Poke Bowls"
+  },
+  {
+    "name": "Margherita Pizza",
+    "description": "Fresh mozzarella san marzano tomatoes basil and extra virgin olive oil on wood-fired crust",
+    "price": "$14.00",
+    "category": "Pizza"
+  },
+  {
+    "name": "Chicken Tikka Masala",
+    "description": "Tandoori chicken in creamy tomato sauce with aromatic spices served with basmati rice",
+    "price": "$15.95",
+    "category": "Indian Entrees"
+  },
+  {
+    "name": "Greek Salad",
+    "description": "Romaine lettuce tomatoes cucumbers kalamata olives feta cheese red onion with lemon oregano dressing",
+    "price": "$10.50",
+    "category": "Salads"
+  },
+  {
+    "name": "Lobster Roll",
+    "description": "Fresh Maine lobster meat with light mayo on toasted buttery roll served with chips",
+    "price": "$22.00",
+    "category": "Seafood Sandwiches"
+  },
+  {
+    "name": "Quinoa Buddha Bowl",
+    "description": "Organic quinoa with roasted chickpeas kale sweet potato tahini dressing and hemp seeds",
+    "price": "$13.50",
+    "category": "Healthy Bowls"
+  },
+  {
+    "name": "Beef Pho",
+    "description": "Traditional Vietnamese beef noodle soup with rice noodles fresh herbs bean sprouts and lime",
+    "price": "$12.75",
+    "category": "Noodle Soups"
+  },
+  {
+    "name": "Eggplant Parmesan",
+    "description": "Breaded eggplant layered with marinara mozzarella and parmesan served with pasta",
+    "price": "$15.25",
+    "category": "Italian Entrees"
+  },
+  {
+    "name": "Crab Cakes",
+    "description": "Maryland-style lump crab cakes with remoulade sauce and mixed greens",
+    "price": "$18.50",
+    "category": "Seafood Appetizers"
+  },
+  {
+    "name": "Tofu Stir Fry",
+    "description": "Crispy tofu with broccoli bell peppers snap peas in garlic ginger sauce over steamed rice",
+    "price": "$12.50",
+    "category": "Vegetarian Entrees"
+  },
+  {
+    "name": "Salmon Sushi Platter",
+    "description": "12 pieces of fresh salmon nigiri and sashimi with wasabi pickled ginger and soy sauce",
+    "price": "$19.95",
+    "category": "Sushi"
+  },
+  {
+    "name": "Caprese Sandwich",
+    "description": "Fresh mozzarella tomatoes basil pesto balsamic glaze on ciabatta bread",
+    "price": "$11.75",
+    "category": "Sandwiches"
+  },
+  {
+    "name": "Tom Yum Soup",
+    "description": "Spicy and sour Thai soup with shrimp lemongrass galangal mushrooms and kaffir lime leaves",
+    "price": "$11.50",
+    "category": "Soups"
+  },
+  {
+    "name": "Lentil Dal",
+    "description": "Red lentils simmered with turmeric cumin coriander served with rice and naan",
+    "price": "$11.95",
+    "category": "Vegan Entrees"
+  },
+  {
+    "name": "Fish and Chips",
+    "description": "Beer-battered cod with crispy fries malt vinegar and tartar sauce",
+    "price": "$16.00",
+    "category": "British Classics"
+  },
+  {
+    "name": "Veggie Burger",
+    "description": "House-made black bean and quinoa patty with avocado sprouts tomato on brioche bun",
+    "price": "$13.25",
+    "category": "Burgers"
+  },
+  {
+    "name": "Miso Ramen",
+    "description": "Rich miso broth with ramen noodles soft-boiled egg bamboo shoots nori and scallions",
+    "price": "$14.50",
+    "category": "Ramen"
+  },
+  {
+    "name": "Stuffed Bell Peppers",
+    "description": "Roasted bell peppers filled with rice vegetables herbs and melted cheese",
+    "price": "$13.75",
+    "category": "Vegetarian Entrees"
+  },
+  {
+    "name": "Scallop Risotto",
+    "description": "Pan-seared sea scallops over creamy parmesan risotto with white wine and lemon",
+    "price": "$26.50",
+    "category": "Seafood Specials"
+  },
+  {
+    "name": "Spring Rolls",
+    "description": "Fresh rice paper rolls with vegetables tofu rice noodles herbs and peanut dipping sauce",
+    "price": "$8.95",
+    "category": "Appetizers"
+  },
+  {
+    "name": "Oyster Po Boy",
+    "description": "Fried oysters with lettuce tomato pickles and remoulade on french bread",
+    "price": "$15.50",
+    "category": "Sandwiches"
+  },
+  {
+    "name": "Portobello Mushroom Steak",
+    "description": "Grilled portobello cap marinated in balsamic with roasted vegetables and quinoa",
+    "price": "$14.95",
+    "category": "Vegan Entrees"
+  },
+  {
+    "name": "Coconut Shrimp",
+    "description": "Jumbo shrimp breaded in shredded coconut served with sweet chili sauce",
+    "price": "$14.25",
+    "category": "Seafood Appetizers"
+  }
+]

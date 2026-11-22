@@ -1,0 +1,683 @@
+{
+  "store": "Fernhollow Outfitters",
+  "documents": [
+    {
+      "id": "returns-v1",
+      "title": "Returns and exchanges",
+      "initial": true,
+      "text": "You can return most items within 30 days of delivery for a refund to the original payment method. Items must be unworn and unwashed, with the original tags attached. Shoes may be tried on indoors, but shoes with any outdoor wear on the soles cannot be returned. Sale items can be returned within 30 days for store credit only, not a refund. Items marked Final Sale, gift cards, and opened packs of socks cannot be returned. Exchanges for a different size or color follow the same 30-day and condition rules and are free. For refunds, a $6.95 return shipping fee is deducted from the refund. Refunds are issued within 5 business days after the return reaches our warehouse."
+    },
+    {
+      "id": "shipping-v1",
+      "title": "Shipping",
+      "initial": true,
+      "text": "We ship from our warehouse in Ohio to the United States, Canada, and the European Union. We do not ship to PO boxes or other countries. Standard shipping within the US takes 3 to 5 business days and is free on orders over $75; orders of $75 or less pay $5.95. US express shipping takes 1 to 2 business days and costs $14.95. Shipping to Canada takes 5 to 8 business days and costs $12.95. Shipping to the European Union takes 7 to 12 business days and costs $19.95, and the customer pays import duties on delivery. Orders placed before 2 p.m. Eastern Time on a business day ship the same day; later orders ship the next business day."
+    },
+    {
+      "id": "payment-v1",
+      "title": "Payment",
+      "initial": true,
+      "text": "We accept Visa, Mastercard, American Express, PayPal, and Fernhollow gift cards. We do not accept cash on delivery, checks, or cryptocurrency. Your card is charged when the order ships, not when you place it. Orders between $150 and $1,000 can be paid in 4 interest-free installments at checkout. You can combine up to two gift cards in one order, and a gift card can be combined with one credit card. All prices are in US dollars. Customers in Canada and the European Union are also charged in US dollars, and their bank may add a currency conversion fee. Promo codes must be entered before payment and cannot be applied to orders that were already placed."
+    },
+    {
+      "id": "warranty-v1",
+      "title": "Warranty",
+      "initial": true,
+      "text": "All footwear has a 1-year warranty against manufacturing defects, such as sole separation, broken eyelets, or failed seams. Jackets and other outerwear have a 2-year warranty covering zippers, seams, and waterproof coatings. Backpacks have a 3-year warranty. The warranty period starts on the delivery date. The warranty does not cover normal wear, such as worn-down tread, damage from misuse, or items altered after purchase. To make a claim, email photos of the defect and your order number to warranty@fernhollow.example. Approved claims get a free replacement of the same item; if the item is no longer available, you get store credit for the purchase price. Warranty claims do not require the original tags."
+    },
+    {
+      "id": "account-v1",
+      "title": "Your account",
+      "initial": true,
+      "text": "You can check out as a guest, but an account lets you see your order history and save addresses. To reset your password, click Forgot password on the sign-in page; the reset link expires after 60 minutes. You can change your email address in Account Settings; the change takes effect after you confirm it from the new address. Guest orders can be added to a new account if you sign up with the same email address within 90 days of the order. To delete your account, contact support; deletion is permanent and takes up to 30 days. Members of the free Trail Club earn 1 point per dollar spent, and 100 points equal a $5 reward."
+    },
+    {
+      "id": "order-tracking-v1",
+      "title": "Order tracking",
+      "initial": true,
+      "text": "When your order ships, we email you a tracking number. Account holders also see order status under Orders in their account. For guest orders, use the Track Order page with your order number and email address. Tracking information can take up to 24 hours to appear after the shipping email. You can cancel or change an order within 1 hour of placing it; after that, it cannot be changed. If tracking shows no movement for 5 business days, contact support and we will open a trace with the carrier. If a package is marked delivered but you cannot find it, report it on the Track Order page within 7 days and we will file a claim with the carrier."
+    },
+    {
+      "id": "returns-v2",
+      "title": "Returns and exchanges",
+      "initial": false,
+      "text": "You can return most items within 14 days of delivery for a refund to the original payment method. Items must be unworn and unwashed, with the original tags attached. Shoes may be tried on indoors, but shoes with any outdoor wear on the soles cannot be returned. Sale items can be returned within 14 days for store credit only, not a refund. Items marked Final Sale, gift cards, and opened packs of socks cannot be returned. Exchanges for a different size or color follow the same 14-day and condition rules and are free. For refunds, a $6.95 return shipping fee is deducted from the refund. Refunds are issued within 5 business days after the return reaches our warehouse."
+    }
+  ],
+  "groups": [
+    {
+      "id": "g01",
+      "split": "tune",
+      "seed": "How many days do I have to return an item?",
+      "source_doc_ids": [
+        "returns-v1"
+      ],
+      "reference_answer": "You can return most items within 30 days of delivery.",
+      "queries": [
+        {
+          "kind": "exact_repeat",
+          "text": "How many days do I have to return an item?",
+          "label": "hit"
+        },
+        {
+          "kind": "rewording",
+          "text": "How many days do I get to return an item?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "What is the time limit for sending something back?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_condition",
+          "text": "How many days does it take to get my refund after my return arrives?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g02",
+      "split": "tune",
+      "seed": "Can I return shoes I have worn outside?",
+      "source_doc_ids": [
+        "returns-v1"
+      ],
+      "reference_answer": "No. Shoes with any outdoor wear on the soles cannot be returned.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "Can I return shoes that I have worn outside?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "Will you take back sneakers if I already wore them outdoors?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "operator_swap",
+          "text": "Can I return shoes I have only worn indoors?",
+          "label": "miss"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_item",
+          "text": "Can I return a jacket if I removed the tags?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g03",
+      "split": "test",
+      "seed": "Do I pay for return shipping when I return an item for a refund?",
+      "source_doc_ids": [
+        "returns-v1"
+      ],
+      "reference_answer": "Yes. For refunds, a $6.95 return shipping fee is deducted from the refund.",
+      "queries": [
+        {
+          "kind": "exact_repeat",
+          "text": "Do I pay for return shipping when I return an item for a refund?",
+          "label": "hit"
+        },
+        {
+          "kind": "rewording",
+          "text": "Do I have to pay for return shipping if I return an item for a refund?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "Is there a fee to send something back if I want my money back?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "operator_swap",
+          "text": "Do I pay for return shipping when I exchange an item?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g04",
+      "split": "test",
+      "seed": "Can I get a refund for a sale item?",
+      "source_doc_ids": [
+        "returns-v1"
+      ],
+      "reference_answer": "No. Sale items can be returned within 30 days for store credit only, not a refund.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "Can I get a refund on a sale item?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "If I return an item I bought on sale, do I get my money back?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_item",
+          "text": "Can I return an opened pack of socks?",
+          "label": "miss"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_condition",
+          "text": "Can I return a Final Sale item for store credit?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g05",
+      "split": "tune",
+      "seed": "How long does standard shipping take within the US?",
+      "source_doc_ids": [
+        "shipping-v1"
+      ],
+      "reference_answer": "Standard shipping within the US takes 3 to 5 business days.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "How long does standard shipping take in the US?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "How many business days until a regular delivery reaches a US address?",
+          "label": "hit"
+        }
+      ]
+    },
+    {
+      "id": "g06",
+      "split": "tune",
+      "seed": "Is standard shipping within the US free on orders over $75?",
+      "source_doc_ids": [
+        "shipping-v1"
+      ],
+      "reference_answer": "Yes. Standard shipping within the US is free on orders over $75.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "Is standard shipping in the US free for orders over $75?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "Do I get free regular delivery in the US when I spend more than $75?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "operator_swap",
+          "text": "Is standard shipping within the US free on orders under $75?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g07",
+      "split": "test",
+      "seed": "If I order before 2 p.m. Eastern Time on a business day, does it ship the same day?",
+      "source_doc_ids": [
+        "shipping-v1"
+      ],
+      "reference_answer": "Yes. Orders placed before 2 p.m. Eastern Time on a business day ship the same day.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "If I place an order before 2 p.m. Eastern Time on a business day, will it ship the same day?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "When I check out at 11 a.m. Eastern on a business day, does my package leave the warehouse that day?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "operator_swap",
+          "text": "If I order after 2 p.m. Eastern Time on a business day, does it ship the same day?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g08",
+      "split": "test",
+      "seed": "Who pays import duties on orders shipped to the European Union?",
+      "source_doc_ids": [
+        "shipping-v1"
+      ],
+      "reference_answer": "The customer pays any import duties on delivery.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "Who pays the import duties on orders shipped to the European Union?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "Are import duties for EU orders included in the price, or do I pay them when the package arrives?",
+          "label": "hit"
+        }
+      ]
+    },
+    {
+      "id": "g09",
+      "split": "tune",
+      "seed": "Which payment methods do you accept?",
+      "source_doc_ids": [
+        "payment-v1"
+      ],
+      "reference_answer": "We accept Visa, Mastercard, American Express, PayPal, and Fernhollow gift cards.",
+      "queries": [
+        {
+          "kind": "exact_repeat",
+          "text": "Which payment methods do you accept?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "Which cards, digital wallets, or gift cards can I pay with?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_item",
+          "text": "Can I split my payment into installments?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g10",
+      "split": "tune",
+      "seed": "What currency am I charged in if I order from Canada?",
+      "source_doc_ids": [
+        "payment-v1"
+      ],
+      "reference_answer": "You are charged in US dollars, and your bank may add a currency conversion fee.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "Which currency will I be charged in if I order from Canada?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "As a customer in Canada, am I billed in Canadian dollars or US dollars?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_policy",
+          "text": "How much does shipping to Canada cost?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g11",
+      "split": "test",
+      "seed": "Can I combine two gift cards in one order?",
+      "source_doc_ids": [
+        "payment-v1"
+      ],
+      "reference_answer": "Yes. You can combine up to two gift cards in one order.",
+      "queries": [
+        {
+          "kind": "exact_repeat",
+          "text": "Can I combine two gift cards in one order?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "Is it possible to pay for a single purchase with a pair of gift cards?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_policy",
+          "text": "Can I return a gift card?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g12",
+      "split": "tune",
+      "seed": "How long is the warranty on shoes?",
+      "source_doc_ids": [
+        "warranty-v1"
+      ],
+      "reference_answer": "Footwear has a 1-year warranty against manufacturing defects.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "How long is the warranty for shoes?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "What warranty period do you offer on footwear?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_item",
+          "text": "How long is the warranty on backpacks?",
+          "label": "miss"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_condition",
+          "text": "When does the warranty period on shoes start?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g13",
+      "split": "test",
+      "seed": "Does the warranty cover worn-down tread on hiking shoes?",
+      "source_doc_ids": [
+        "warranty-v1"
+      ],
+      "reference_answer": "No. The warranty does not cover normal wear, such as worn-down tread.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "Does the warranty cover worn-down tread on my hiking shoes?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "The tread on my running shoes has worn smooth from use. Is that covered under warranty?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_condition",
+          "text": "Does the warranty cover soles that came apart on my hiking shoes?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g14",
+      "split": "test",
+      "seed": "The zipper on my jacket broke 2 months after delivery. Can I still return it for a refund?",
+      "source_doc_ids": [
+        "returns-v1"
+      ],
+      "reference_answer": "No. Items can be returned for a refund only within 30 days of delivery, and 2 months is past that window.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "The zipper on my jacket broke two months after delivery. Can I still send it back for a refund?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "My coat's zipper stopped working about 8 weeks after it arrived. Can I still return it for my money back?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_policy",
+          "text": "The zipper on my jacket broke 2 months after delivery. Can I get a free replacement under the warranty?",
+          "label": "miss"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_item",
+          "text": "The zipper on my backpack broke 2 years after delivery. Is it covered by the warranty?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g15",
+      "split": "test",
+      "seed": "How do I reset my password?",
+      "source_doc_ids": [
+        "account-v1"
+      ],
+      "reference_answer": "Click Forgot password on the sign-in page. The reset link expires after 60 minutes.",
+      "queries": [
+        {
+          "kind": "exact_repeat",
+          "text": "How do I reset my password?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "I forgot my login password. What should I do?",
+          "label": "hit"
+        }
+      ]
+    },
+    {
+      "id": "g16",
+      "split": "tune",
+      "seed": "Can I add a guest order to a new account?",
+      "source_doc_ids": [
+        "account-v1"
+      ],
+      "reference_answer": "Yes, if you sign up with the same email address within 90 days of the order.",
+      "queries": [
+        {
+          "kind": "exact_repeat",
+          "text": "Can I add a guest order to a new account?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "I checked out without signing in. Can that purchase show up in an account I create later?",
+          "label": "hit"
+        }
+      ]
+    },
+    {
+      "id": "g17",
+      "split": "tune",
+      "seed": "How many Trail Club points do I earn per dollar?",
+      "source_doc_ids": [
+        "account-v1"
+      ],
+      "reference_answer": "Trail Club members earn 1 point per dollar spent.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "How many Trail Club points do I get per dollar?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "What is the points rate per dollar spent for Trail Club members?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_condition",
+          "text": "How many Trail Club points do I need for a $5 reward?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g18",
+      "split": "tune",
+      "seed": "When will I get a tracking number?",
+      "source_doc_ids": [
+        "order-tracking-v1"
+      ],
+      "reference_answer": "We email you a tracking number when your order ships.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "When do I get a tracking number?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "At what point do you send me the tracking code for my package?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_condition",
+          "text": "How long after the shipping email does tracking information show up?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g19",
+      "split": "test",
+      "seed": "How long do I have to cancel an order after placing it?",
+      "source_doc_ids": [
+        "order-tracking-v1"
+      ],
+      "reference_answer": "You can cancel an order within 1 hour of placing it.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "How long do I have to cancel my order after placing it?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "Is there a time limit for canceling a purchase I just made?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_policy",
+          "text": "How long does it take to delete my account?",
+          "label": "miss"
+        }
+      ]
+    },
+    {
+      "id": "g20",
+      "split": "test",
+      "seed": "What should I do if my package is marked delivered but I cannot find it?",
+      "source_doc_ids": [
+        "order-tracking-v1"
+      ],
+      "reference_answer": "Report it on the Track Order page within 7 days, and we will file a claim with the carrier.",
+      "queries": [
+        {
+          "kind": "rewording",
+          "text": "What should I do if my package shows as delivered but I can't find it?",
+          "label": "hit"
+        },
+        {
+          "kind": "paraphrase",
+          "text": "Tracking says my package arrived, but it is not at my door. What do I do?",
+          "label": "hit"
+        },
+        {
+          "kind": "related",
+          "related_kind": "other_condition",
+          "text": "What should I do if my tracking has shown no movement for 5 business days?",
+          "label": "miss"
+        }
+      ]
+    }
+  ],
+  "unrelated": [
+    {
+      "split": "tune",
+      "text": "Do you have a physical store in Berlin?",
+      "label": "miss"
+    },
+    {
+      "split": "tune",
+      "text": "When is my card charged for an order?",
+      "label": "miss"
+    },
+    {
+      "split": "tune",
+      "text": "Do you sell children's hiking boots?",
+      "label": "miss"
+    },
+    {
+      "split": "tune",
+      "text": "Do you ship to PO boxes?",
+      "label": "miss"
+    },
+    {
+      "split": "tune",
+      "text": "Do you price match other stores?",
+      "label": "miss"
+    },
+    {
+      "split": "test",
+      "text": "Is there a phone number for customer support?",
+      "label": "miss"
+    },
+    {
+      "split": "test",
+      "text": "Can I use a promo code on an order I already placed?",
+      "label": "miss"
+    },
+    {
+      "split": "test",
+      "text": "Do I need the original tags for a warranty claim?",
+      "label": "miss"
+    },
+    {
+      "split": "test",
+      "text": "Are your jackets made from recycled materials?",
+      "label": "miss"
+    },
+    {
+      "split": "test",
+      "text": "Do you offer a student discount?",
+      "label": "miss"
+    }
+  ],
+  "do_not_cache": [
+    {
+      "text": "Where is my order?",
+      "reason": "user_specific",
+      "bypass": "cache_lookup_and_storage"
+    },
+    {
+      "text": "Has my refund been processed yet?",
+      "reason": "user_specific",
+      "bypass": "cache_lookup_and_storage"
+    },
+    {
+      "text": "How many Trail Club points do I have?",
+      "reason": "user_specific",
+      "bypass": "cache_lookup_and_storage"
+    },
+    {
+      "text": "Is the autumn sale still on?",
+      "reason": "time_sensitive",
+      "bypass": "cache_lookup_and_storage"
+    },
+    {
+      "text": "Are the waterproof hiking boots in size 9 in stock right now?",
+      "reason": "time_sensitive",
+      "bypass": "cache_lookup_and_storage"
+    },
+    {
+      "text": "If I order today, will it arrive by Friday?",
+      "reason": "time_sensitive",
+      "bypass": "cache_lookup_and_storage"
+    }
+  ]
+}
