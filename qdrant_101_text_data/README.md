@@ -1,6 +1,6 @@
 # Qdrant & Text Data
 
-![qdrant](../images/crab_nlp.png)
+![qdrant](./img/crab_nlp.png)
 
 This tutorial will show you how to use Qdrant to develop a semantic search service. At its core, this service will harness Natural Language Processing (NLP) methods and use Qdrant's API to store, search, and manage vectors with an additional payload.
 
